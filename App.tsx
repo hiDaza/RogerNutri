@@ -1,5 +1,5 @@
-import Login from "./src/assets/pages/Login";
+import Routes from "./src/assets/Routes";
 
 export default function App() {
-  return <Login />;
+  return <Routes />;
 }

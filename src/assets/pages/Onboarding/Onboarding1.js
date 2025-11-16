@@ -1,15 +1,11 @@
-// src/pages/Onboarding/Onboarding1.js
-
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 
 export default function Onboarding1({ navigation }) {
   return (
     <View style={styles.container}>
-
       <Text style={styles.logo}>RogerNutri</Text>
 
-            {/* Imagem da Tela */}
       <Image
         source={require("../../Images/TelaInicial1.png")}
         style={styles.image}
@@ -21,17 +17,20 @@ export default function Onboarding1({ navigation }) {
         Com ferramentas incríveis você pode monitorar seu progresso
       </Text>
 
-      <TouchableOpacity 
+      {/* BOTÃO PRINCIPAL → vai para Onboarding2 */}
+      <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Onboarding2")}
+        onPress={() => navigation.navigate("Onboarding2")} // Alterado aqui
       >
         <Text style={styles.buttonText}>Próximo</Text>
       </TouchableOpacity>
 
-      <Text style={styles.footer}>
-        Já possui uma conta? <Text style={styles.link}>Login aqui</Text>
-      </Text>
-
+      {/* LINK PARA LOGIN */}
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.footer}>
+          Já possui uma conta? <Text style={styles.link}>Login aqui</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -89,5 +88,5 @@ const styles = StyleSheet.create({
   link: {
     color: "#FF9800",
     fontWeight: "600",
-  }
+  },
 });

@@ -1,38 +1,36 @@
-// src/pages/Onboarding/Onboarding3.js
-
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 
 export default function Onboarding3({ navigation }) {
   return (
     <View style={styles.container}>
-
       <Text style={styles.logo}>RogerNutri</Text>
 
-            {/* Imagem da Tela */}
       <Image
         source={require("../../Images/TelaInicial3.png")}
         style={styles.image}
         resizeMode="contain"
       />
 
-
       <Text style={styles.title}>Receitas saudáveis</Text>
       <Text style={styles.subtitle}>
         Busque por centenas de receitas saudáveis ao redor do mundo
       </Text>
 
+      {/* VAI PARA CADASTRO - ESTÁ CORRETO */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("Login")}
+        onPress={() => navigation.navigate("Cadastro")}
       >
         <Text style={styles.buttonText}>Vamos começar</Text>
       </TouchableOpacity>
 
-      <Text style={styles.footer}>
-        Já possui uma conta? <Text style={styles.link}>Login aqui</Text>
-      </Text>
-
+      {/* TEXTO CLICÁVEL PARA LOGIN */}
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.footer}>
+          Já possui uma conta? <Text style={styles.link}>Login aqui</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -92,4 +90,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   }
 });
-

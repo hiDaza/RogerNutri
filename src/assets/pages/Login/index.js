@@ -1,5 +1,3 @@
-// src/pages/Login/index.js
-
 import React, { useState } from "react";
 import { 
   View, 
@@ -9,7 +7,7 @@ import {
   StyleSheet 
 } from "react-native";
 
-export default function Login() {
+export default function Login({ navigation }) { // Adicione navigation como parâmetro
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [lembrar, setLembrar] = useState(false);
@@ -61,8 +59,8 @@ export default function Login() {
         <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
       </TouchableOpacity>
 
-      {/* Criar conta */}
-      <TouchableOpacity>
+      {/* Criar conta - CORRIGIDO */}
+      <TouchableOpacity onPress={() => navigation.navigate("Cadastro")}>
         <Text style={styles.register}>
           Não tem uma conta? <Text style={styles.registerLink}>Cadastre-se</Text>
         </Text>

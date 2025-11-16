@@ -7,6 +7,7 @@ import Onboarding2 from "../pages/Onboarding/Onboarding2";
 import Onboarding3 from "../pages/Onboarding/Onboarding3";
 import Login from "../pages/Login";
 import Cadastro from "../pages/Cadastro";
+import EsqueceuSenha from "../pages/EsqueceuSenha";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ export default function Routes() {
 
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
+        <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} /> 
 
       </Stack.Navigator>
     </NavigationContainer>

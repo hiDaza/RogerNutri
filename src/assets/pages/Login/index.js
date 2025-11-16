@@ -55,7 +55,7 @@ export default function Login({ navigation }) { // Adicione navigation como par√
       </TouchableOpacity>
 
       {/* Esqueceu senha */}
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate("EsqueceuSenha")}>
         <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
       </TouchableOpacity>
 

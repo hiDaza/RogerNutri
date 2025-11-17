@@ -7,15 +7,14 @@ import {
   StyleSheet 
 } from "react-native";
 
-export default function InformacoesUsuarioPasso3({ navigation, route }) {
+export default function InformacoesUsuarioPasso4({ navigation, route }) {
+  // Extrair todos os parâmetros necessários
   const { 
     pesoAtual, 
-    altura, 
-    imc, 
-    categoria, 
-    pesoIdealMin, 
-    pesoIdealMax,
-    quantidade 
+    altura,
+    movimentacao,
+    genero,
+    dataNascimento
   } = route.params;
 
   const [pesoDesejado, setPesoDesejado] = useState("");
@@ -23,26 +22,31 @@ export default function InformacoesUsuarioPasso3({ navigation, route }) {
 
   // Calcular sugestão baseada no IMC
   const calcularSugestao = () => {
+    // Calcular peso ideal (IMC entre 18.5 e 24.9)
+    const alturaMetros = altura / 100;
+    const pesoIdealMin = 18.5 * (alturaMetros * alturaMetros);
+    const pesoIdealMax = 24.9 * (alturaMetros * alturaMetros);
     const pesoIdealMedio = (pesoIdealMin + pesoIdealMax) / 2;
+    
     let diferencaPeso, acao, sugestaoTexto, duracaoSugerida;
 
-    if (categoria === "Abaixo") {
+    if (pesoAtual < pesoIdealMin) {
       // Precisa ganhar peso
       diferencaPeso = pesoIdealMedio - pesoAtual;
       acao = "Ganhar";
       // Ganho saudável: 0.25-0.5 kg por semana
       duracaoSugerida = Math.max(30, Math.round((diferencaPeso / 0.3) * 7));
-    } else if (categoria === "Normal") {
-      // Manter o peso
-      diferencaPeso = 0;
-      acao = "Manter";
-      duracaoSugerida = 30; // Período padrão para manutenção
-    } else {
-      // Precisa perder peso (Sobrepeso ou Obesidade)
+    } else if (pesoAtual > pesoIdealMax) {
+      // Precisa perder peso
       diferencaPeso = pesoAtual - pesoIdealMedio;
       acao = "Perder";
       // Perda saudável: 0.5-1 kg por semana
       duracaoSugerida = Math.max(30, Math.round((diferencaPeso / 0.5) * 7));
+    } else {
+      // Manter o peso
+      diferencaPeso = 0;
+      acao = "Manter";
+      duracaoSugerida = 30; // Período padrão para manutenção
     }
 
     sugestaoTexto = diferencaPeso > 0 ? 
@@ -105,18 +109,26 @@ export default function InformacoesUsuarioPasso3({ navigation, route }) {
         keyboardType="numeric"
       />
 
-      {/* Botão Vamos lá! */}
+      {/* Botão Vamos lá! - CORRIGIDO */}
       <TouchableOpacity 
         style={styles.primaryButton}
         onPress={() => {
-          // Aqui você pode salvar as metas e navegar para a tela principal
-          console.log("Meta definida:", {
-            pesoDesejado: pesoDesejado,
-            duracao: duracao,
+          // Verificar se todos os dados estão disponíveis
+          if (!pesoDesejado || !duracao) {
+            alert("Por favor, preencha todos os campos.");
+            return;
+          }
+          
+          // Navega para a tela Home passando todos os dados necessários
+          navigation.navigate("CadastroFinalizado", {
             pesoAtual: pesoAtual,
-            altura: altura
+            pesoDesejado: parseFloat(pesoDesejado),
+            duracao: parseFloat(duracao),
+            genero: genero,
+            dataNascimento: dataNascimento,
+            altura: altura,
+            movimentacao: movimentacao
           });
-          // navigation.navigate("TelaPrincipal");
         }}
       >
         <Text style={styles.primaryButtonText}>Vamos lá!</Text>

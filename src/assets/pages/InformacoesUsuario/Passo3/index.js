@@ -7,7 +7,7 @@ import {
 } from "react-native";
 
 export default function InformacoesUsuarioPasso3({ navigation, route }) {
-  const { peso, altura } = route.params;
+  const { peso, altura, movimentacao, genero, dataNascimento} = route.params;
   
   const [imc, setImc] = useState(null);
   const [categoria, setCategoria] = useState("");
@@ -58,6 +58,9 @@ export default function InformacoesUsuarioPasso3({ navigation, route }) {
     navigation.navigate("InformacoesUsuarioPasso4", {
       pesoAtual: peso,
       altura: altura,
+      movimentacao: movimentacao,
+      genero: genero,
+      dataNascimento: dataNascimento,
       imc: parseFloat(imc),
       categoria: categoria,
       pesoIdealMin: pesoIdealMin,

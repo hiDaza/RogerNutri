@@ -12,7 +12,7 @@ import InformacoesUsuarioPasso1 from "../pages/InformacoesUsuario/Passo1";
 import InformacoesUsuarioPasso2 from "../pages/InformacoesUsuario/Passo2";
 import InformacoesUsuarioPasso3 from "../pages/InformacoesUsuario/Passo3"; 
 import InformacoesUsuarioPasso4 from "../pages/InformacoesUsuario/Passo4";
-
+import CadastroFinalizado from "../pages/CadastroFinalizado";
 const Stack = createNativeStackNavigator();
 
 export default function Routes() {
@@ -31,6 +31,7 @@ export default function Routes() {
         <Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
         <Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
         <Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
+        <Stack.Screen name="CadastroFinalizado" component={CadastroFinalizado} />
       </Stack.Navigator>
     </NavigationContainer>
   );

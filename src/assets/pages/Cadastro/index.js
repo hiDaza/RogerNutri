@@ -5,42 +5,99 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 
 export default function Cadastro({ navigation }) {
   const [remember, setRemember] = useState(false);
+  const [usuario, setUsuario] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validarEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validarCampos = () => {
+    const novosErros = {};
+
+    if (!usuario.trim()) {
+      novosErros.usuario = "Usuário é obrigatório";
+    }
+
+    if (!email.trim()) {
+      novosErros.email = "Email é obrigatório";
+    } else if (!validarEmail(email)) {
+      novosErros.email = "Email inválido";
+    }
+
+    if (!senha.trim()) {
+      novosErros.senha = "Senha é obrigatória";
+    } else if (senha.length < 6) {
+      novosErros.senha = "Senha deve ter pelo menos 6 caracteres";
+    }
+
+    setErrors(novosErros);
+    return Object.keys(novosErros).length === 0;
+  };
+
+  const handleCadastrar = () => {
+    if (validarCampos()) {
+      // Se todos os campos estão válidos, navega para a próxima tela
+      navigation.navigate("InformacoesUsuarioPasso1");
+    }
+  };
 
   return (
     <View style={styles.container}>
-
       {/* Logo */}
       <Text style={styles.logo}>RogerNutri</Text>
 
       {/* Título */}
       <Text style={styles.title}>Cadastrar</Text>
 
-      {/* Input Usuário (ALTERADO) */}
+      {/* Input Usuário */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.usuario && styles.inputError]}
         placeholder="Usuário"
         placeholderTextColor="#888"
+        value={usuario}
+        onChangeText={(text) => {
+          setUsuario(text);
+          if (errors.usuario) setErrors({...errors, usuario: null});
+        }}
       />
+      {errors.usuario && <Text style={styles.errorText}>{errors.usuario}</Text>}
 
       {/* Input Email */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.email && styles.inputError]}
         placeholder="Email"
         placeholderTextColor="#888"
         keyboardType="email-address"
+        value={email}
+        onChangeText={(text) => {
+          setEmail(text);
+          if (errors.email) setErrors({...errors, email: null});
+        }}
       />
+      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
       {/* Input Senha */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.senha && styles.inputError]}
         placeholder="Senha"
         placeholderTextColor="#888"
         secureTextEntry
+        value={senha}
+        onChangeText={(text) => {
+          setSenha(text);
+          if (errors.senha) setErrors({...errors, senha: null});
+        }}
       />
+      {errors.senha && <Text style={styles.errorText}>{errors.senha}</Text>}
 
       {/* Checkbox Customizado */}
       <View style={styles.checkboxContainer}>
@@ -50,10 +107,10 @@ export default function Cadastro({ navigation }) {
         <Text style={styles.checkboxText}>Lembre-se de mim</Text>
       </View>
 
-      {/* Botão Cadastrar - AGORA VAI PARA INFORMAÇÕES USUÁRIO */}
+      {/* Botão Cadastrar */}
       <TouchableOpacity 
         style={styles.button}
-        onPress={() => navigation.navigate("InformacoesUsuarioPasso1")}
+        onPress={handleCadastrar}
       >
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
@@ -64,7 +121,6 @@ export default function Cadastro({ navigation }) {
           Já tem uma conta? <Text style={styles.link}>faça login</Text>
         </Text>
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -96,8 +152,17 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     fontSize: 15,
-    marginBottom: 15,
+    marginBottom: 5,
     backgroundColor: "#FFF",
+  },
+  inputError: {
+    borderColor: "#FF0000",
+  },
+  errorText: {
+    color: "#FF0000",
+    fontSize: 12,
+    marginBottom: 10,
+    marginLeft: 5,
   },
   checkboxContainer: {
     flexDirection: "row",

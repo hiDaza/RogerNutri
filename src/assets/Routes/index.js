@@ -10,7 +10,8 @@ import Cadastro from "../pages/Cadastro";
 import EsqueceuSenha from "../pages/EsqueceuSenha";
 import InformacoesUsuarioPasso1 from "../pages/InformacoesUsuario/Passo1";
 import InformacoesUsuarioPasso2 from "../pages/InformacoesUsuario/Passo2";
-
+import InformacoesUsuarioPasso3 from "../pages/InformacoesUsuario/Passo3"; 
+import InformacoesUsuarioPasso4 from "../pages/InformacoesUsuario/Passo4";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,8 @@ export default function Routes() {
         <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} /> 
         <Stack.Screen name="InformacoesUsuarioPasso1" component={InformacoesUsuarioPasso1} />
         <Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
+        <Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
+        <Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
       </Stack.Navigator>
     </NavigationContainer>
   );

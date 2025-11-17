@@ -4,13 +4,39 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  StyleSheet 
+  StyleSheet,
+  Alert
 } from "react-native";
+import { AuthService } from "../../services/auth";
 
-export default function Login({ navigation }) { // Adicione navigation como par√¢metro
+export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [lembrar, setLembrar] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email.trim()) {
+      Alert.alert("Erro", "Por favor, informe seu email");
+      return;
+    }
+
+    if (!senha) {
+      Alert.alert("Erro", "Por favor, informe sua senha");
+      return;
+    }
+
+    setLoading(true);
+    const result = await AuthService.login(email, senha, lembrar);
+    setLoading(false);
+
+    if (result.success) {
+      // Navegar para tela inicial
+      navigation.navigate("Inicial");
+    } else {
+      Alert.alert("Erro", result.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -28,6 +54,8 @@ export default function Login({ navigation }) { // Adicione navigation como par√
         placeholder="Digite seu email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       {/* Campo Senha */}
@@ -50,8 +78,14 @@ export default function Login({ navigation }) { // Adicione navigation como par√
       </TouchableOpacity>
 
       {/* Bot√£o Login */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Login</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Entrando..." : "Login"}
+        </Text>
       </TouchableOpacity>
 
       {/* Esqueceu senha */}
@@ -139,6 +173,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 25,
+  },
+
+  buttonDisabled: {
+    opacity: 0.6,
   },
 
   buttonText: {

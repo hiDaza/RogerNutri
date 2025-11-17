@@ -5,10 +5,53 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import { AuthService } from "../../services/auth";
 
-export default function Cadastro({ navigation }) { // Certifique-se que navigation está nos parâmetros
+export default function Cadastro({ navigation }) {
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [remember, setRemember] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleCadastro = async () => {
+    // Validações
+    if (!nome.trim()) {
+      Alert.alert("Erro", "Por favor, informe seu nome completo");
+      return;
+    }
+
+    if (!email.trim()) {
+      Alert.alert("Erro", "Por favor, informe seu email");
+      return;
+    }
+
+    if (!senha || senha.length < 6) {
+      Alert.alert("Erro", "A senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
+    setLoading(true);
+    const result = await AuthService.register(nome, email, senha);
+    setLoading(false);
+
+    if (result.success) {
+      Alert.alert(
+        "Sucesso!",
+        result.message,
+        [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("Login")
+          }
+        ]
+      );
+    } else {
+      Alert.alert("Erro", result.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -24,6 +67,8 @@ export default function Cadastro({ navigation }) { // Certifique-se que navigati
         style={styles.input}
         placeholder="Nome Completo"
         placeholderTextColor="#888"
+        value={nome}
+        onChangeText={setNome}
       />
 
       {/* Input Email */}
@@ -32,14 +77,19 @@ export default function Cadastro({ navigation }) { // Certifique-se que navigati
         placeholder="Email"
         placeholderTextColor="#888"
         keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Input Senha */}
       <TextInput
         style={styles.input}
-        placeholder="Senha"
+        placeholder="Senha (mín. 6 caracteres)"
         placeholderTextColor="#888"
         secureTextEntry
+        value={senha}
+        onChangeText={setSenha}
       />
 
       {/* Checkbox Customizado */}
@@ -51,8 +101,14 @@ export default function Cadastro({ navigation }) { // Certifique-se que navigati
       </View>
 
       {/* Botão Cadastrar */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleCadastro}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Cadastrando..." : "Cadastrar"}
+        </Text>
       </TouchableOpacity>
 
       {/* Link para Login - CORRIGIDO */}
@@ -124,6 +180,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     marginTop: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     color: "#FFF",

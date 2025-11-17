@@ -8,6 +8,9 @@ import Onboarding3 from "../pages/Onboarding/Onboarding3";
 import Login from "../pages/Login";
 import Cadastro from "../pages/Cadastro";
 import EsqueceuSenha from "../pages/EsqueceuSenha";
+import Inicial from "../pages/Tela Inicial";
+import Favoritos from "../pages/Favoritos";
+import DetalhesAlimento from "../components/DetalhesAlimento";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,15 +18,24 @@ export default function Routes() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-
         <Stack.Screen name="Onboarding1" component={Onboarding1} />
         <Stack.Screen name="Onboarding2" component={Onboarding2} />
         <Stack.Screen name="Onboarding3" component={Onboarding3} />
 
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
-        <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} /> 
+        <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} />
 
+        <Stack.Screen name="Inicial" component={Inicial} />
+        <Stack.Screen name="Favoritos" component={Favoritos} />
+        <Stack.Screen
+          name="DetalhesAlimento"
+          component={DetalhesAlimento}
+          options={{
+            presentation: "transparentModal",
+            animation: "slide_from_bottom",
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

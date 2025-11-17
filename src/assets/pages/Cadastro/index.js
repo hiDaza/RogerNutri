@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-export default function Cadastro({ navigation }) { // Certifique-se que navigation está nos parâmetros
+export default function Cadastro({ navigation }) {
   const [remember, setRemember] = useState(false);
 
   return (
@@ -19,10 +19,10 @@ export default function Cadastro({ navigation }) { // Certifique-se que navigati
       {/* Título */}
       <Text style={styles.title}>Cadastrar</Text>
 
-      {/* Input Nome */}
+      {/* Input Usuário (ALTERADO) */}
       <TextInput
         style={styles.input}
-        placeholder="Nome Completo"
+        placeholder="Usuário"
         placeholderTextColor="#888"
       />
 
@@ -50,16 +50,16 @@ export default function Cadastro({ navigation }) { // Certifique-se que navigati
         <Text style={styles.checkboxText}>Lembre-se de mim</Text>
       </View>
 
-      {/* Botão Cadastrar */}
-      <TouchableOpacity style={styles.button}>
+      {/* Botão Cadastrar - AGORA VAI PARA INFORMAÇÕES USUÁRIO */}
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={() => navigation.navigate("InformacoesUsuarioPasso1")}
+      >
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
-      {/* Link para Login - CORRIGIDO */}
-      <TouchableOpacity 
-        style={styles.loginLink} // Adicionei um estilo específico
-        onPress={() => navigation.navigate("Login")} // Certifique-se que está chamando navigate
-      >
+      {/* Link para Login */}
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
         <Text style={styles.footer}>
           Já tem uma conta? <Text style={styles.link}>faça login</Text>
         </Text>
@@ -131,11 +131,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  loginLink: {
-    marginTop: 18,
-    alignItems: "center",
-  },
   footer: {
+    marginTop: 18,
     textAlign: "center",
     color: "#777",
   },

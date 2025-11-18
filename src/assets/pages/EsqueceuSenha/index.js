@@ -4,11 +4,39 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  StyleSheet 
+  StyleSheet,
+  Alert 
 } from "react-native";
 
 export default function EsqueceuSenha({ navigation }) {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validarEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validarCampos = () => {
+    const novosErros = {};
+
+    if (!email.trim()) {
+      novosErros.email = "Email é obrigatório";
+    } else if (!validarEmail(email)) {
+      novosErros.email = "Email inválido";
+    }
+
+    setErrors(novosErros);
+    return Object.keys(novosErros).length === 0;
+  };
+
+  const handleEnviar = () => {
+    if (validarCampos()) {
+      Alert.alert("Sucesso", "Email de recuperação enviado com sucesso!");
+      // Aqui você implementaria o envio real do email
+      navigation.goBack();
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -28,15 +56,22 @@ export default function EsqueceuSenha({ navigation }) {
       {/* Campo Email */}
       <Text style={styles.label}>Email de acesso</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.email && styles.inputError]}
         placeholder="Digite seu email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => {
+          setEmail(text);
+          if (errors.email) setErrors({...errors, email: null});
+        }}
         keyboardType="email-address"
       />
+      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
       {/* Botão Enviar */}
-      <TouchableOpacity style={styles.primaryButton}>
+      <TouchableOpacity 
+        style={styles.primaryButton}
+        onPress={handleEnviar}
+      >
         <Text style={styles.primaryButtonText}>Enviar</Text>
       </TouchableOpacity>
 
@@ -91,7 +126,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     fontSize: 15,
-    marginBottom: 30,
+    marginBottom: 5,
+  },
+  inputError: {
+    borderColor: "#FF0000",
+  },
+  errorText: {
+    color: "#FF0000",
+    fontSize: 12,
+    marginBottom: 20,
+    marginLeft: 5,
   },
   primaryButton: {
     backgroundColor: "#FF9800",

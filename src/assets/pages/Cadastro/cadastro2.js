@@ -5,11 +5,12 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 
 export default function Cadastro({ navigation }) {
   const [remember, setRemember] = useState(false);
-  const [nome, setNome] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [errors, setErrors] = useState({});
@@ -22,8 +23,8 @@ export default function Cadastro({ navigation }) {
   const validarCampos = () => {
     const novosErros = {};
 
-    if (!nome.trim()) {
-      novosErros.nome = "Nome é obrigatório";
+    if (!usuario.trim()) {
+      novosErros.usuario = "Usuário é obrigatório";
     }
 
     if (!email.trim()) {
@@ -44,15 +45,8 @@ export default function Cadastro({ navigation }) {
 
   const handleCadastrar = () => {
     if (validarCampos()) {
-      // Passa os dados do cadastro para as próximas telas
-      navigation.navigate("InformacoesUsuarioPasso1", {
-        dadosCadastro: {
-          nome,
-          email,
-          senha,
-          lembrar: remember
-        }
-      });
+      // Se todos os campos estão válidos, navega para a próxima tela
+      navigation.navigate("InformacoesUsuarioPasso1");
     }
   };
 
@@ -64,18 +58,18 @@ export default function Cadastro({ navigation }) {
       {/* Título */}
       <Text style={styles.title}>Cadastrar</Text>
 
-      {/* Input Nome */}
+      {/* Input Usuário */}
       <TextInput
-        style={[styles.input, errors.nome && styles.inputError]}
-        placeholder="Nome Completo"
+        style={[styles.input, errors.usuario && styles.inputError]}
+        placeholder="Usuário"
         placeholderTextColor="#888"
-        value={nome}
+        value={usuario}
         onChangeText={(text) => {
-          setNome(text);
-          if (errors.nome) setErrors({...errors, nome: null});
+          setUsuario(text);
+          if (errors.usuario) setErrors({...errors, usuario: null});
         }}
       />
-      {errors.nome && <Text style={styles.errorText}>{errors.nome}</Text>}
+      {errors.usuario && <Text style={styles.errorText}>{errors.usuario}</Text>}
 
       {/* Input Email */}
       <TextInput
@@ -83,7 +77,6 @@ export default function Cadastro({ navigation }) {
         placeholder="Email"
         placeholderTextColor="#888"
         keyboardType="email-address"
-        autoCapitalize="none"
         value={email}
         onChangeText={(text) => {
           setEmail(text);
@@ -95,7 +88,7 @@ export default function Cadastro({ navigation }) {
       {/* Input Senha */}
       <TextInput
         style={[styles.input, errors.senha && styles.inputError]}
-        placeholder="Senha (mín. 6 caracteres)"
+        placeholder="Senha"
         placeholderTextColor="#888"
         secureTextEntry
         value={senha}
@@ -119,7 +112,7 @@ export default function Cadastro({ navigation }) {
         style={styles.button}
         onPress={handleCadastrar}
       >
-        <Text style={styles.buttonText}>Próximo</Text>
+        <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
       {/* Link para Login */}

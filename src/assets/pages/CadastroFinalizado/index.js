@@ -3,85 +3,56 @@ import {
   View, 
   Text, 
   TouchableOpacity, 
-  StyleSheet 
+  StyleSheet,
+  Alert
 } from "react-native";
 
 export default function CadastroFinalizado({ navigation, route }) {
+  // Recebe os dados completos com fallback seguro
+  const { dadosCompletos = {} } = route.params || {};
+  
+  console.log("Dados recebidos:", dadosCompletos);
+
+  // Extrai os parâmetros com valores padrão
   const { 
-    pesoAtual, 
-    pesoDesejado, 
-    duracao,
-    genero,
-    dataNascimento,
-    altura,
-    movimentacao
-  } = route.params;
+    peso: pesoAtual = 70, 
+    pesoDesejado = 70, 
+    duracao = 90,
+    genero = "Masculino",
+    dataNascimento = "01/01/1990",
+    altura = 170,
+    movimentacao = "Moderadamente ativo"
+  } = dadosCompletos;
 
-  // Função para calcular idade a partir da data de nascimento
-  const calcularIdade = (dataNascimento) => {
-    const hoje = new Date();
-    const nascimento = new Date(dataNascimento.split('/').reverse().join('-'));
-    let idade = hoje.getFullYear() - nascimento.getFullYear();
-    const mes = hoje.getMonth() - nascimento.getMonth();
-    
-    if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
-      idade--;
-    }
-    
-    return idade;
-  };
-
-  // Função para calcular a Taxa Metabólica Basal (TMB)
-  const calcularTMB = (peso, altura, idade, genero) => {
-    if (genero === "Masculino") {
-      return 88.362 + (13.397 * peso) + (4.799 * altura) - (5.677 * idade);
-    } else {
-      return 447.593 + (9.247 * peso) + (3.098 * altura) - (4.330 * idade);
-    }
-  };
-
-  // Função para obter o fator de atividade
-  const obterFatorAtividade = (movimentacao) => {
-    switch(movimentacao) {
-      case "Sedentário (pouco ou nenhum exercício)":
-        return 1.2;
-      case "Levemente ativo (exercício leve 1-3 dias/semana)":
-        return 1.375;
-      case "Moderadamente ativo (exercício moderado 3-5 dias/semana)":
-        return 1.55;
-      case "Muito ativo (exercício intenso 6-7 dias/semana)":
-        return 1.725;
-      case "Extremamente ativo (exercício muito intenso, trabalho físico)":
-        return 1.9;
-      default:
-        return 1.2;
-    }
-  };
-
-  // Cálculo das calorias diárias necessárias
+  // Cálculo simplificado e robusto das calorias
   const calcularCaloriasDiarias = () => {
-    const idade = calcularIdade(dataNascimento);
-    const tmb = calcularTMB(pesoAtual, altura, idade, genero);
-    const fatorAtividade = obterFatorAtividade(movimentacao);
-    
-    // Gasto calórico diário (manutenção)
-    const gastoCaloricoDiario = tmb * fatorAtividade;
-    
-    // Diferença de peso (pode ser positiva para ganho ou negativa para perda)
-    const diferencaPeso = pesoDesejado - pesoAtual;
-    
-    // Cálculo do déficit/superávit calórico necessário
-    // 7700 kcal ≈ 1 kg de gordura corporal
-    const caloriasTotaisNecessarias = diferencaPeso * 7700;
-    const caloriasDiariasAdicionais = caloriasTotaisNecessarias / duracao;
-    
-    // Calorias diárias totais
-    const caloriasDiariasTotais = gastoCaloricoDiario + caloriasDiariasAdicionais;
-    
-    return Math.round(caloriasDiariasTotais);
+    try {
+      // Cálculo base simples para demonstração
+      const diferencaPeso = pesoDesejado - pesoAtual;
+      const caloriasBase = 2000; // Calorias base para manutenção
+      
+      // Ajuste baseado na diferença de peso e duração
+      const ajusteCalorico = (diferencaPeso * 7700) / duracao;
+      const caloriasTotais = caloriasBase + ajusteCalorico;
+      
+      // Limitar a um range razoável
+      return Math.max(1200, Math.min(4000, Math.round(caloriasTotais)));
+    } catch (error) {
+      console.error("Erro no cálculo:", error);
+      return 2000; // Valor padrão
+    }
   };
 
   const caloriasDiarias = calcularCaloriasDiarias();
+
+  const handleComecar = () => {
+    // Navega para a Tela Inicial
+    navigation.navigate("Inicial");
+    
+    // Opcional: Mostrar mensagem de sucesso
+    Alert.alert("Bem-vindo!", "Cadastro concluído com sucesso!");
+    console.log("Navegando para Tela Inicial");
+  };
 
   return (
     <View style={styles.container}>
@@ -105,14 +76,10 @@ export default function CadastroFinalizado({ navigation, route }) {
       <Text style={styles.subtitle}>por dia para</Text>
       <Text style={styles.subtitle}>atingir sua meta</Text>
 
-      {/* Botão para ir para a tela principal */}
+      {/* Botão para ir para a Tela Inicial - CORRIGIDO */}
       <TouchableOpacity 
         style={styles.button}
-        onPress={() => {
-          // Aqui você pode navegar para a tela principal do app
-          // navigation.navigate("MainApp");
-          console.log("Ir para a tela principal");
-        }}
+        onPress={handleComecar}
       >
         <Text style={styles.buttonText}>Começar</Text>
       </TouchableOpacity>

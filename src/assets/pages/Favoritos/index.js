@@ -138,7 +138,10 @@ export default function Favoritos({ navigation }) {
         <TouchableOpacity style={styles.navButton}>
           <Text style={styles.navIconActive}>♥</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
+        <TouchableOpacity 
+          style={styles.navButton}
+          onPress={() => navigation.navigate("Perfil")}
+        >
           <Text style={styles.navIcon}>👤</Text>
         </TouchableOpacity>
       </View>

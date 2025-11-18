@@ -55,18 +55,22 @@ export default function InformacoesUsuarioPasso3({ navigation, route }) {
     }
   };
 
-  const navegarParaPasso4 = () => {
-    navigation.navigate("InformacoesUsuarioPasso4", {
-      dadosCadastro: {
+    const navegarParaPasso4 = () => {
+    const dadosParaPasso4 = {
         ...dadosCadastro,
         imc: parseFloat(imc),
         categoria,
         pesoIdealMin,
         pesoIdealMax,
         quantidade
-      }
+    };
+  
+    console.log("Passo3 enviando para Passo4:", dadosParaPasso4);
+  
+    navigation.navigate("InformacoesUsuarioPasso4", {
+        dadosCadastro: dadosParaPasso4
     });
-  };
+    };
 
   return (
     <View style={styles.container}>

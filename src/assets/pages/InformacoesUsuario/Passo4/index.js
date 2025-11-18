@@ -8,7 +8,8 @@ import {
   Alert,
   ActivityIndicator
 } from "react-native";
-import { AuthService } from "../../../services/auth";
+import { auth } from "../../../services/auth";
+import { UserService } from "../../../services/UserService";
 
 export default function InformacoesUsuarioPasso4({ navigation, route }) {
   // Extrair todos os parâmetros necessários
@@ -82,42 +83,63 @@ export default function InformacoesUsuarioPasso4({ navigation, route }) {
     setDuracao(sugestao.duracaoSugerida.toString());
   }, []);
 
-  const handleFinalizar = async () => {
-    // Verificar se todos os campos estão preenchidos
-    if (!pesoDesejado || !duracao) {
-      Alert.alert("Atenção", "Por favor, preencha todos os campos.");
-      return;
-    }
+const handleFinalizar = async () => {
+  // Verificar se todos os campos estão preenchidos
+  if (!pesoDesejado || !duracao) {
+    Alert.alert("Atenção", "Por favor, preencha todos os campos.");
+    return;
+  }
 
-    setLoading(true);
-    
-    try {
-      // Salvar usuário com todos os dados coletados
-      const result = await AuthService.register(
-        nome || nomeCompleto, 
-        email, 
-        senha
-      );
-      
-      setLoading(false);
-
-      if (result.success) {
-        // Navegar para tela de cadastro finalizado com todos os dados
-        navigation.navigate("CadastroFinalizado", {
-          dadosCompletos: {
-            ...dadosCadastro,
-            pesoDesejado: parseFloat(pesoDesejado),
-            duracao: parseFloat(duracao)
-          }
-        });
-      } else {
-        Alert.alert("Erro", result.message || "Erro ao criar conta. Tente novamente.");
-      }
-    } catch (error) {
-      setLoading(false);
-      Alert.alert("Erro", "Erro ao criar conta. Verifique sua conexão e tente novamente.");
-    }
+  const dadosParaCadastroFinalizado = {
+    ...dadosCadastro,
+    pesoDesejado: parseFloat(pesoDesejado),
+    duracao: parseFloat(duracao)
   };
+
+  console.log("DEBUG - Dados para cadastro:", dadosParaCadastroFinalizado);
+
+  setLoading(true);
+  
+  try {
+    console.log("DEBUG - Tentando salvar no UserService...");
+    
+    //Salvar dados completos no UserService
+    const userServiceResult = await UserService.saveUserData(dadosParaCadastroFinalizado);
+    console.log("DEBUG - UserService result:", userServiceResult);
+    
+    if (!userServiceResult) {
+      throw new Error("Falha ao salvar dados no UserService");
+    }
+    
+    console.log("DEBUG - Tentando registrar no AuthService...");
+    
+    // Registrar usuário no AuthService
+    const authResult = await auth.register(
+      nome || nomeCompleto, 
+      email, 
+      senha,
+      dadosParaCadastroFinalizado
+    );
+    
+    console.log("🔍 DEBUG - AuthService result:", authResult);
+    
+    setLoading(false);
+
+    if (authResult.success) {
+      console.log("DEBUG - Cadastro bem-sucedido, navegando...");
+      navigation.navigate("CadastroFinalizado", {
+        dadosCompletos: dadosParaCadastroFinalizado
+      });
+    } else {
+      console.log("DEBUG - Erro no AuthService:", authResult.message);
+      Alert.alert("Erro no Cadastro", authResult.message || "Erro ao criar conta. Tente novamente.");
+    }
+  } catch (error) {
+    setLoading(false);
+    console.error("DEBUG - Erro completo no handleFinalizar:", error);
+    Alert.alert("Erro", `Erro detalhado: ${error.message}. Verifique sua conexão e tente novamente.`);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -158,7 +180,7 @@ export default function InformacoesUsuarioPasso4({ navigation, route }) {
         keyboardType="numeric"
       />
 
-      {/* Botão Vamos lá! */}
+      {/* Botão Finalizar Cadastro */}
       <TouchableOpacity 
         style={[styles.primaryButton, loading && styles.buttonDisabled]}
         onPress={handleFinalizar}

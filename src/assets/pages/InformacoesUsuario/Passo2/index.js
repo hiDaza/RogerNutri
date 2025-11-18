@@ -10,7 +10,12 @@ import {
   TouchableWithoutFeedback,
   Platform
 } from "react-native";
-import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Para web, não importamos o DateTimePicker
+let DateTimePicker;
+if (Platform.OS !== 'web') {
+  DateTimePicker = require('@react-native-community/datetimepicker').default;
+}
 
 export default function InformacoesUsuarioPasso2({ navigation, route }) {
   const { dadosCadastro } = route.params || {};
@@ -18,7 +23,8 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
   const [altura, setAltura] = useState("");
   const [movimentacao, setMovimentacao] = useState("");
   const [genero, setGenero] = useState("");
-  const [dataNascimento, setDataNascimento] = useState(new Date());
+  const [dataNascimento, setDataNascimento] = useState(new Date(1990, 0, 1));
+  const [dataInput, setDataInput] = useState("01/01/1990"); // Para web
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [errors, setErrors] = useState({});
   
@@ -44,13 +50,29 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
 
   // Função para formatar a data no formato DD/MM/AAAA
   const formatarData = (data) => {
+    if (Platform.OS === 'web') {
+      return dataInput; // Retorna o input direto na web
+    }
+    
     const dia = String(data.getDate()).padStart(2, '0');
     const mes = String(data.getMonth() + 1).padStart(2, '0');
     const ano = data.getFullYear();
     return `${dia}/${mes}/${ano}`;
   };
 
-  // Função chamada quando a data é selecionada
+  // Função para converter string DD/MM/AAAA para Date
+  const converterParaData = (dataStr) => {
+    const partes = dataStr.split('/');
+    if (partes.length === 3) {
+      const dia = parseInt(partes[0], 10);
+      const mes = parseInt(partes[1], 10) - 1;
+      const ano = parseInt(partes[2], 10);
+      return new Date(ano, mes, dia);
+    }
+    return new Date(1990, 0, 1); // Data padrão
+  };
+
+  // Função chamada quando a data é selecionada (mobile)
   const onChangeDate = (event, selectedDate) => {
     if (Platform.OS === 'android') {
       setShowDatePicker(false);
@@ -60,6 +82,27 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
       setDataNascimento(selectedDate);
       if (errors.dataNascimento) setErrors({...errors, dataNascimento: null});
     }
+  };
+
+  // Função para validar data no formato DD/MM/AAAA
+  const validarData = (dataStr) => {
+    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+    if (!regex.test(dataStr)) return false;
+    
+    const partes = dataStr.split('/');
+    const dia = parseInt(partes[0], 10);
+    const mes = parseInt(partes[1], 10) - 1;
+    const ano = parseInt(partes[2], 10);
+    
+    const data = new Date(ano, mes, dia);
+    const hoje = new Date();
+    
+    return (
+      data.getDate() === dia &&
+      data.getMonth() === mes &&
+      data.getFullYear() === ano &&
+      data <= hoje
+    );
   };
 
   const validarCampos = () => {
@@ -85,8 +128,18 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
       novosErros.genero = "Gênero é obrigatório";
     }
 
-    if (!dataNascimento) {
-      novosErros.dataNascimento = "Data de nascimento é obrigatória";
+    // Validação de data diferente para web e mobile
+    if (Platform.OS === 'web') {
+      if (!dataInput.trim()) {
+        novosErros.dataNascimento = "Data de nascimento é obrigatória";
+      } else if (!validarData(dataInput)) {
+        novosErros.dataNascimento = "Data deve estar no formato DD/MM/AAAA e não pode ser futura";
+      }
+    } else {
+      const hoje = new Date();
+      if (dataNascimento > hoje) {
+        novosErros.dataNascimento = "Data de nascimento não pode ser futura";
+      }
     }
 
     setErrors(novosErros);
@@ -95,16 +148,21 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
 
   const handleProximo = () => {
     if (validarCampos()) {
+      // Preparar dados para próxima tela
+      const dadosParaPasso3 = {
+        ...dadosCadastro,
+        peso: parseFloat(peso),
+        altura: parseFloat(altura),
+        movimentacao,
+        genero,
+        dataNascimento: Platform.OS === 'web' ? dataInput : formatarData(dataNascimento)
+      };
+      
+      console.log("📤 Passo2 enviando para Passo3:", dadosParaPasso3);
+      
       // Navega para a tela do IMC passando os dados
       navigation.navigate("InformacoesUsuarioPasso3", {
-        dadosCadastro: {
-          ...dadosCadastro,
-          peso: parseFloat(peso),
-          altura: parseFloat(altura),
-          movimentacao,
-          genero,
-          dataNascimento: formatarData(dataNascimento)
-        }
+        dadosCadastro: dadosParaPasso3
       });
     }
   };
@@ -119,6 +177,72 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
     setGenero(generoSelecionado);
     setModalGeneroVisible(false);
     if (errors.genero) setErrors({...errors, genero: null});
+  };
+
+  // Renderização do campo de data condicional
+  const renderCampoData = () => {
+    if (Platform.OS === 'web') {
+      return (
+        <>
+          <TextInput
+            style={[styles.input, errors.dataNascimento && styles.inputError]}
+            placeholder="DD/MM/AAAA"
+            value={dataInput}
+            onChangeText={(text) => {
+              // Formatação automática
+              let formattedText = text.replace(/\D/g, '');
+              if (formattedText.length > 2) {
+                formattedText = formattedText.substring(0, 2) + '/' + formattedText.substring(2);
+              }
+              if (formattedText.length > 5) {
+                formattedText = formattedText.substring(0, 5) + '/' + formattedText.substring(5, 9);
+              }
+              setDataInput(formattedText);
+              if (errors.dataNascimento) setErrors({...errors, dataNascimento: null});
+            }}
+            maxLength={10}
+          />
+          <Text style={styles.helperText}>Formato: DD/MM/AAAA</Text>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <TouchableOpacity 
+            style={[styles.dropdown, errors.dataNascimento && styles.inputError]}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.dropdownText}>
+              {formatarData(dataNascimento)}
+            </Text>
+            <Text style={styles.dropdownArrow}>▼</Text>
+          </TouchableOpacity>
+          
+          {showDatePicker && DateTimePicker && (
+            <DateTimePicker
+              value={dataNascimento}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={onChangeDate}
+              maximumDate={new Date()}
+              minimumDate={new Date(1900, 0, 1)}
+              locale="pt-BR"
+            />
+          )}
+
+          {showDatePicker && Platform.OS === 'ios' && (
+            <View style={styles.iosDatePickerContainer}>
+              <TouchableOpacity 
+                style={styles.closeDatePickerButton}
+                onPress={() => setShowDatePicker(false)}
+              >
+                <Text style={styles.closeDatePickerText}>Confirmar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </>
+      );
+    }
   };
 
   return (
@@ -182,40 +306,10 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
       </TouchableOpacity>
       {errors.genero && <Text style={styles.errorText}>{errors.genero}</Text>}
 
-      {/* Campo Data de Nascimento */}
+      {/* Campo Data de Nascimento - CONDICIONAL */}
       <Text style={styles.label}>Data de Nascimento</Text>
-      <TouchableOpacity 
-        style={[styles.dropdown, errors.dataNascimento && styles.inputError]}
-        onPress={() => setShowDatePicker(true)}
-      >
-        <Text style={styles.dropdownText}>
-          {formatarData(dataNascimento)}
-        </Text>
-        {/* <Text style={styles.dropdownArrow}>📅</Text> */}
-      </TouchableOpacity>
+      {renderCampoData()}
       {errors.dataNascimento && <Text style={styles.errorText}>{errors.dataNascimento}</Text>}
-
-      {/* Date Picker */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={dataNascimento}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onChangeDate}
-          maximumDate={new Date()}
-          locale="pt-BR"
-        />
-      )}
-
-      {/* iOS: Botão para fechar o date picker */}
-      {showDatePicker && Platform.OS === 'ios' && (
-        <TouchableOpacity 
-          style={styles.closeDatePickerButton}
-          onPress={() => setShowDatePicker(false)}
-        >
-          <Text style={styles.closeDatePickerText}>Confirmar</Text>
-        </TouchableOpacity>
-      )}
 
       {/* Linha divisória */}
       <View style={styles.divider} />
@@ -354,6 +448,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginLeft: 5,
   },
+  helperText: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 10,
+    marginLeft: 5,
+  },
   // Estilos para o dropdown
   dropdown: {
     height: 45,
@@ -458,12 +558,16 @@ const styles = StyleSheet.create({
     color: "#FF9800",
     fontWeight: "600",
   },
+  // Estilos para o DatePicker no iOS
+  iosDatePickerContainer: {
+    backgroundColor: "#FFF",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
   closeDatePickerButton: {
     backgroundColor: "#FF9800",
-    paddingVertical: 10,
-    borderRadius: 6,
-    marginTop: 10,
-    marginBottom: 10,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
   closeDatePickerText: {

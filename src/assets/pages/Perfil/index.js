@@ -201,6 +201,7 @@ export default function Perfil({ navigation, route }) {
             <TouchableOpacity style={styles.cameraButton}>
               <Text style={styles.cameraIcon}>+</Text>
             </TouchableOpacity>
+            
           </View>
           <Text style={styles.userName}>{userData.nomeCompleto || "Usuario"}</Text>
           <Text style={styles.userEmail}>{userData.email || "email@exemplo.com"}</Text>

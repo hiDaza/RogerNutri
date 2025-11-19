@@ -7,6 +7,8 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BottomNavigation from "../../components/Botao/BottomNavigation";
 
 export default function Favoritos({ navigation }) {
   const [abaAtiva, setAbaAtiva] = useState("receitas");
@@ -37,7 +39,7 @@ export default function Favoritos({ navigation }) {
   ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={styles.title}>Favoritos</Text>
 
       {/* Abas */}
@@ -122,30 +124,8 @@ export default function Favoritos({ navigation }) {
       </ScrollView>
 
       {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity
-          style={styles.navButton}
-          onPress={() => navigation.navigate("Inicial")}
-        >
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>⋮⋮</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>👥</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIconActive}>♥</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => navigation.navigate("Perfil")}
-        >
-          <Text style={styles.navIcon}>👤</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <BottomNavigation navigation={navigation} activeScreen="Favoritos" />
+    </SafeAreaView>
   );
 }
 
@@ -195,7 +175,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 10,
-    gap: 15,
+    justifyContent: "space-between",
   },
   comidaCard: {
     width: "30%",
@@ -204,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    margin: 5,
+    marginBottom: 15,
   },
   comidaEmoji: {
     fontSize: 50,
@@ -216,7 +196,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    margin: 5,
+    marginBottom: 15,
   },
   addIcon: {
     fontSize: 50,

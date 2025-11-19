@@ -1,8 +1,10 @@
 // components/Botao/BottomNavigation.js
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function BottomNavigation({ navigation, activeScreen }) {
+  const insets = useSafeAreaInsets();
   console.log('BottomNavigation - Tela ativa:', activeScreen);
 
   const handleNavigation = (screenName) => {
@@ -18,7 +20,7 @@ export default function BottomNavigation({ navigation, activeScreen }) {
   };
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[styles.bottomNav, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       <TouchableOpacity 
         style={styles.navButton}
         onPress={() => handleNavigation('Inicial')}
@@ -82,13 +84,12 @@ const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: '#FF9800',
-    height: 70,
+    paddingTop: 10,
     paddingHorizontal: 5,
     justifyContent: 'space-around',
     alignItems: 'center',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: 10,
   },
   navButton: {
     alignItems: 'center',

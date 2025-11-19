@@ -11,6 +11,7 @@ import {
   Modal,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -177,7 +178,7 @@ export default function Perfil({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
       
       <View style={styles.header}>
@@ -354,7 +355,7 @@ export default function Perfil({ navigation, route }) {
       </Modal>
 
       <BottomNavigation navigation={navigation} activeScreen="Perfil" />
-    </View>
+    </SafeAreaView>
   );
 }
 

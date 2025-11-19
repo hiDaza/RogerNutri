@@ -8,7 +8,9 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomNavigation from "../../components/Botao/BottomNavigation";
 
 export default function Progresso({ navigation, route }) {
   const [refeicoesExpandidas, setRefeicoesExpandidas] = useState({});
@@ -233,7 +235,7 @@ export default function Progresso({ navigation, route }) {
   const caloriasRestantes = caloriasMeta - caloriasConsumidas;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
       
       {/* 1. Cabeçalho Superior */}
@@ -426,34 +428,8 @@ export default function Progresso({ navigation, route }) {
       </ScrollView>
 
       {/* 8. Rodapé da Tela */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => navigation.navigate("Inicial")}
-        >
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>🍽</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>📊</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navButton}>
-          <Text style={styles.navIcon}>❤</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => navigation.navigate("Perfil")}
-        >
-          <Text style={styles.navIcon}>👤</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <BottomNavigation navigation={navigation} activeScreen="Progresso" />
+    </SafeAreaView>
   );
 }
 

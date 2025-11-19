@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert
 } from "react-native";
-import { AuthService } from "../../services/auth";
+import { auth as AuthService } from "../../services/auth";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");

@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import Onboarding1 from "../pages/Onboarding/Onboarding1";
 import Onboarding2 from "../pages/Onboarding/Onboarding2";
@@ -23,8 +24,10 @@ const Stack = createNativeStackNavigator();
 
 export default function Routes() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Favoritos" component={Favoritos} />
         <Stack.Screen name="Onboarding1" component={Onboarding1} />
         <Stack.Screen name="Onboarding2" component={Onboarding2} />
         <Stack.Screen name="Onboarding3" component={Onboarding3} />
@@ -39,7 +42,6 @@ export default function Routes() {
         <Stack.Screen name="CadastroFinalizado" component={CadastroFinalizado} />
         <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="Progresso" component={Progresso} />
-        <Stack.Screen name="Favoritos" component={Favoritos} />
         <Stack.Screen name="Perfil" component={Perfil} />
         <Stack.Screen name="AdicionarAlimento" component={AdicionarAlimento} />
         <Stack.Screen
@@ -52,5 +54,6 @@ export default function Routes() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </SafeAreaProvider>
   );
 }

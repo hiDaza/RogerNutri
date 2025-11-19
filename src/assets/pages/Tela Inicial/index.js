@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import BottomNavigation from "../../components/Botao/BottomNavigation";
 
@@ -135,7 +136,7 @@ export default function Inicial({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.greeting}>
           Bom dia, <Text style={styles.userName}>Almir Artero</Text>
@@ -201,7 +202,7 @@ export default function Inicial({ navigation }) {
 
        {/* Bottom Navigation Component */}
       <BottomNavigation navigation={navigation} activeScreen="Inicial" />
-    </View>
+    </SafeAreaView>
   );
 }
 

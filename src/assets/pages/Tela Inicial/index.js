@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,9 +12,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import BottomNavigation from "../../components/Botao/BottomNavigation";
+import { auth } from "../../services/auth";
 
 export default function Inicial({ navigation }) {
   const [refeicoesExpandidas, setRefeicoesExpandidas] = useState({});
+  const [user, setUser] = useState({})
   
   const refeicoesPadrao = [
     {
@@ -324,11 +326,20 @@ export default function Inicial({ navigation }) {
     return todosFavoritos;
   };
 
+  const getUser = async () => {
+    setUser(await auth.getCurrentUser());
+  }
+
+  useEffect(() => {
+    getUser();
+  })
+
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.greeting}>
-          Bom dia, <Text style={styles.userName}>Almir Artero</Text>
+          Bom dia, <Text style={styles.userName}>{user?.nome ?? "Almir"}</Text>
         </Text>
 
         {refeicoes.map((refeicao) => (

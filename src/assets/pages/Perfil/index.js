@@ -10,6 +10,7 @@ import {
   TextInput,
   Modal,
   Alert,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
 import BottomNavigation from "../../components/Botao/BottomNavigation";
+import Header from "../../components/Header";
 
 export default function Perfil({ navigation, route }) {
   const [userData, setUserData] = useState({
@@ -39,6 +41,18 @@ export default function Perfil({ navigation, route }) {
   const [editingField, setEditingField] = useState("");
   const [tempValue, setTempValue] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [modalObjetivoVisible, setModalObjetivoVisible] = useState(false);
+
+  // Lista de objetivos
+  const objetivos = [
+    "Perder Peso",
+    "Ganhar Peso", 
+    "Manter Peso",
+    "Dieta Fitness",
+    "Melhorar Saúde",
+    "Ganhar Massa Muscular",
+    "Reduzir Percentual de Gordura"
+  ];
 
   useFocusEffect(
     React.useCallback(() => {
@@ -177,6 +191,23 @@ export default function Perfil({ navigation, route }) {
     }
   };
 
+  const selecionarObjetivo = async (objetivoSelecionado) => {
+    const updatedUserData = {
+      ...userData,
+      objetivo: objetivoSelecionado
+    };
+    setUserData(updatedUserData);
+    setModalObjetivoVisible(false);
+    
+    try {
+      await saveToAsyncStorage(updatedUserData);
+      Alert.alert("Sucesso", "Objetivo atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar dados:", error);
+      Alert.alert("Erro", "Nao foi possivel salvar as alteracoes.");
+    }
+  };
+
   const getFieldLabel = (field) => {
     const labels = {
       nomeCompleto: "Nome Completo",
@@ -207,16 +238,10 @@ export default function Perfil({ navigation, route }) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
       
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backIcon}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil</Text>
-        <View style={styles.placeholder} />
-      </View>
+       <Header
+        title="Perfil"
+        onBackPress={() => navigation.goBack()}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.profileImageContainer}>
@@ -328,7 +353,7 @@ export default function Perfil({ navigation, route }) {
 
           <TouchableOpacity 
             style={styles.infoRow}
-            onPress={() => openEditModal("objetivo", userData.objetivo)}
+            onPress={() => setModalObjetivoVisible(true)}
           >
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Objetivo:</Text>
@@ -378,6 +403,40 @@ export default function Perfil({ navigation, route }) {
             </View>
           </View>
         </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalObjetivoVisible}
+        onRequestClose={() => setModalObjetivoVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalObjetivoVisible(false)}>
+          <View style={styles.objModalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.objModalContent}>
+                <Text style={styles.objModalTitle}>Selecione seu objetivo</Text>
+                <ScrollView style={styles.objModalList}>
+                  {objetivos.map((objetivoItem, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.objModalItem}
+                      onPress={() => selecionarObjetivo(objetivoItem)}
+                    >
+                      <Text style={styles.objModalItemText}>{objetivoItem}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity 
+                  style={styles.objModalCloseButton}
+                  onPress={() => setModalObjetivoVisible(false)}
+                >
+                  <Text style={styles.objModalCloseText}>Fechar</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       <BottomNavigation navigation={navigation} activeScreen="Perfil" />
@@ -582,5 +641,50 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  objModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  objModalContent: {
+    backgroundColor: "#FFF",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "50%",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  objModalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 15,
+    color: "#333",
+  },
+  objModalList: {
+    maxHeight: 300,
+  },
+  objModalItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  objModalItemText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  objModalCloseButton: {
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#f0f0f0",
+  },
+  objModalCloseText: {
+    fontSize: 16,
+    color: "#FF9800",
+    fontWeight: "600",
   },
 });

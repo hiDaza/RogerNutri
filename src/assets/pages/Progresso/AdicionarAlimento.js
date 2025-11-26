@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import Header from '../../components/Header';
 
 export default function AdicionarAlimento({ navigation, route }) {
   const [pesquisa, setPesquisa] = useState('');
@@ -365,13 +366,10 @@ export default function AdicionarAlimento({ navigation, route }) {
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
       
       {/* Cabeçalho */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backIcon}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{refeicaoNome}</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header 
+        title={refeicaoNome}
+        onBackPress={() => navigation.goBack()}
+      />
 
       {/* Barra de Pesquisa - APENAS NAS ABAS PESQUISAR E MINHAS COMIDAS */}
       {(abaAtiva === 'Pesquisar' || abaAtiva === 'Minhas Comidas') && (

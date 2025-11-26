@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavigation from "../../components/Botao/BottomNavigation";
+import Header from "../../components/Header"; // Import the new component
 import Svg, { Circle } from 'react-native-svg';
 
 export default function Progresso({ navigation, route }) {
@@ -320,24 +321,13 @@ export default function Progresso({ navigation, route }) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
       
-      {/* 1. Cabeçalho Superior */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backIcon}>‹</Text>
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>Dia a Dia</Text>
-        
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => abrirTelaAdicionar(1)} // Abre para Café da Manhã por padrão
-        >
-          <Text style={styles.addIcon}>+</Text>
-        </TouchableOpacity>
-      </View>
+      {/* 1. Cabeçalho Superior - REPLACED */}
+      <Header 
+        title="Dia a Dia"
+        onBackPress={() => navigation.goBack()}
+        rightButtonIcon="+"
+        onRightButtonPress={() => abrirTelaAdicionar(1)}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         

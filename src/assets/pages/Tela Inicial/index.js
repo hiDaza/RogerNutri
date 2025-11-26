@@ -84,7 +84,7 @@ export default function Inicial({ navigation }) {
               carboidratos: "20g",
               gorduras: "8g",
               descricao: "Pão de queijo tradicional mineiro",
-              imagem: require("../../Images/TelaInicial1.png")
+              imagem: require("../../Images/PaoQueijo.webp")
             },
             {
               id: "102",
@@ -94,7 +94,7 @@ export default function Inicial({ navigation }) {
               carboidratos: "10g",
               gorduras: "2g",
               descricao: "Café preto com leite integral",
-              imagem: require("../../Images/TelaInicial2.png")
+              imagem: require("../../Images/Cafeleite.jpeg")
             }
           ]
         },
@@ -112,7 +112,7 @@ export default function Inicial({ navigation }) {
               carboidratos: "45g",
               gorduras: "10g",
               descricao: "Arroz branco com peito de frango grelhado",
-              imagem: require("../../Images/TelaInicial1.png")
+              imagem: require("../../Images/frango.webp")
             },
             {
               id: "202",
@@ -122,7 +122,7 @@ export default function Inicial({ navigation }) {
               carboidratos: "5g",
               gorduras: "0g",
               descricao: "Alface, rúcula e pepino",
-              imagem: require("../../Images/TelaInicial2.png")
+              imagem: require("../../Images/PaoQueijo.webp")
             }
           ]
         },
@@ -147,7 +147,7 @@ export default function Inicial({ navigation }) {
               carboidratos: "25g",
               gorduras: "5g",
               descricao: "Iogurte natural com morango e banana",
-              imagem: require("../../Images/TelaInicial1.png")
+              imagem: require("../../Images/PaoQueijo.webp")
             }
           ]
         },

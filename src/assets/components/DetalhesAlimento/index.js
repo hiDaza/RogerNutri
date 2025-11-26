@@ -15,6 +15,7 @@ export default function DetalhesAlimento({ route, navigation }) {
 
   const descricao = alimento?.descricao || "Sem descrição disponível para este alimento.";
   const ingredientes = alimento?.ingredientes || [];
+  const imagem = alimento?.imagem || require("../../Images/ArrozFrango.png");
 
   return (
     <Modal

@@ -116,10 +116,8 @@ export default function Progresso({ navigation, route }) {
     }
   };
 
-
   const adicionarAlimentoDaTela = (alimento, refeicaoId) => {
     console.log("Adicionando alimento:", alimento);
-    console.log(refeicoes);
     setRefeicoes(prevRefeicoes => {
       const refeicoesAtualizadas = prevRefeicoes.map(refeicao => {
         // Usando == para permitir comparação entre string e number
@@ -136,14 +134,12 @@ export default function Progresso({ navigation, route }) {
         return refeicao;
       });
       
-    console.log(refeicoesAtualizadas)
       return refeicoesAtualizadas;
     });
     
     // Atualizar calorias consumidas totais
     setCaloriasConsumidas(prev => {
       const novasCalorias = prev + alimento.kcal;
-      console.log("Novas calorias consumidas:", novasCalorias);
       return novasCalorias;
     });
     
@@ -166,6 +162,58 @@ export default function Progresso({ navigation, route }) {
     } else {
       console.error("Refeição não encontrada para ID:", refeicaoId);
     }
+  };
+  
+  // Função para excluir um alimento
+const excluirAlimento = (refeicaoId, alimentoIndex) => {
+  setRefeicoes(prevRefeicoes => {
+    let totalCaloriasRemovidas = 0;
+
+    const novasRefeicoes = prevRefeicoes.map(refeicao => {
+      if (refeicao.id == refeicaoId) {
+
+        const alimentoRemovido = refeicao.alimentos[alimentoIndex];
+        if (!alimentoRemovido) return refeicao;
+
+        totalCaloriasRemovidas = parseFloat(alimentoRemovido.kcal) || 0;
+
+        const novosAlimentos = refeicao.alimentos.filter((_, idx) => idx !== alimentoIndex);
+        const novasCalorias = novosAlimentos.reduce(
+          (sum, alimento) => sum + (parseFloat(alimento.kcal) || 0),
+          0
+        );
+
+        return {
+          ...refeicao,
+          alimentos: novosAlimentos,
+          calorias: novasCalorias
+        };
+      }
+      return refeicao;
+    });
+
+    setCaloriasConsumidas(prev => Math.max(0, prev - totalCaloriasRemovidas));
+
+    return novasRefeicoes;
+  });
+};
+  // Função para confirmar exclusão
+  const confirmarExclusao = (refeicaoId, alimentoIndex, alimentoNome) => {
+    Alert.alert(
+      "Excluir Alimento",
+      `Deseja excluir "${alimentoNome}"?`,
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: () => excluirAlimento(refeicaoId, alimentoIndex)
+        }
+      ]
+    );
   };
 
   const carregarDadosUsuario = async () => {
@@ -231,7 +279,6 @@ export default function Progresso({ navigation, route }) {
         ];
         
         setRefeicoes(refeicoesIniciais);
-        console.log("Dados carregados")
         setCaloriasConsumidas(0);
         setCaloriasQueimadas(0);
       }
@@ -425,105 +472,118 @@ export default function Progresso({ navigation, route }) {
             <Text style={styles.arrowIcon}>›</Text>
           </TouchableOpacity>
         </View>
+<View style={styles.mealsContainer}>
+  {refeicoes.map((refeicao) => {
+    const totais = refeicao.alimentos.length > 0 ? calcularTotais(refeicao.alimentos) : null;
+    
+    return (
+      <View key={refeicao.id}>
+        {/* Card Principal da Refeição */}
+        <TouchableOpacity 
+          style={[
+            styles.mealCard, 
+            { backgroundColor: refeicao.cor }
+          ]}
+          onPress={() => toggleRefeicao(refeicao.id)}
+        >
+          <Text style={styles.mealIcon}>+</Text>
+          <Text style={styles.mealName}>{refeicao.nome}</Text>
+          <View style={styles.mealInfo}>
+            <Text style={styles.mealCalories}>{refeicao.calorias.toFixed(0)} kcal</Text>
+            {refeicao.alimentos.length > 0 && (
+              <Text style={styles.mealCount}>({refeicao.alimentos.length})</Text>
+            )}
+          </View>
+        </TouchableOpacity>
 
-        {/* 6. Lista de Blocos de Refeição / Atividades */}
-        <View style={styles.mealsContainer}>
-          {refeicoes.map((refeicao) => {
-            const totais = refeicao.alimentos.length > 0 ? calcularTotais(refeicao.alimentos) : null;
-            
-            return (
-              <View key={refeicao.id}>
-                {/* Card Principal da Refeição */}
+        {/* Primeiro nível: Total Consumido (sem detalhes) */}
+        {refeicoesExpandidas[refeicao.id] && refeicao.alimentos.length > 0 && (
+          <View style={styles.expandedContent}>
+            {/* Subcard de Total Consumido - Agora clicável para expandir detalhes */}
+            <TouchableOpacity 
+              style={styles.totalConsumedCard}
+              onPress={() => toggleDetalhes(refeicao.id)}
+            >
+              <Text style={styles.totalConsumedText}>
+                Total Consumido: {refeicao.calorias.toFixed(0)} Kcal
+              </Text>
+              <Text style={styles.expandIcon}>
+                {detalhesExpandidos[refeicao.id] ? '▼' : '▶'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Segundo nível: Tabela Nutricional Expandida (apenas quando clicado no Total Consumido) */}
+            {detalhesExpandidos[refeicao.id] && (
+              <View style={styles.foodsTable}>
+                <View style={styles.tableHeader}>
+                  <Text style={styles.headerCell}>Nome</Text>
+                  <Text style={styles.headerCell}>Quantidade</Text>
+                  <Text style={styles.headerCell}>Kcal</Text>
+                  <Text style={styles.headerCell}>Carb</Text>
+                  <Text style={styles.headerCell}>Proteínas</Text>
+                  <Text style={styles.headerCell}>Fibras</Text>
+                  <Text style={styles.headerCell}>Ações</Text>
+                </View>
+                
+                {refeicao.alimentos.map((alimento, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.cell}>{alimento.nome}</Text>
+                    <Text style={styles.cell}>{alimento.quantidade}</Text>
+                    <Text style={styles.cell}>{alimento.kcal}</Text>
+                    <Text style={styles.cell}>{alimento.carboidratos}</Text>
+                    <Text style={styles.cell}>{alimento.proteinas}</Text>
+                    <Text style={styles.cell}>{alimento.fibras}</Text>
+                    <View style={styles.actionCell}>
+                      <TouchableOpacity 
+                        style={styles.deleteButton}
+                        onPress={() => confirmarExclusao(refeicao.id, index, alimento.nome)}
+                      >
+                        <Text style={styles.deleteButtonText}>✕</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+                
+                {/* Linha de Totais */}
+                {totais && (
+                  <View style={[styles.tableRow, styles.totalRow]}>
+                    <Text style={[styles.cell, styles.totalCell]}>Total</Text>
+                    <Text style={[styles.cell, styles.totalCell]}>{totais.quantidade.toFixed(0)}g</Text>
+                    <Text style={[styles.cell, styles.totalCell]}>{totais.kcal.toFixed(0)}</Text>
+                    <Text style={[styles.cell, styles.totalCell]}>{totais.carboidratos.toFixed(0)}g</Text>
+                    <Text style={[styles.cell, styles.totalCell]}>{totais.proteinas.toFixed(0)}g</Text>
+                    <Text style={[styles.cell, styles.totalCell]}>{totais.fibras.toFixed(0)}g</Text>
+                    <View style={[styles.cell, styles.totalCell]}></View>
+                  </View>
+                )}
+
+                {/* Botão para adicionar mais alimentos a esta refeição */}
                 <TouchableOpacity 
-                  style={[
-                    styles.mealCard, 
-                    { backgroundColor: refeicao.cor }
-                  ]}
-                  onPress={() => toggleRefeicao(refeicao.id)}
+                  style={styles.addFoodButton}
+                  onPress={() => abrirTelaAdicionar(refeicao.id)}
                 >
-                  <Text style={styles.mealIcon}>+</Text>
-                  <Text style={styles.mealName}>{refeicao.nome}</Text>
-                  <Text style={styles.mealCalories}>{refeicao.calorias.toFixed(0)} kcal</Text>
+                  <Text style={styles.addFoodButtonText}>+ Adicionar Alimento</Text>
                 </TouchableOpacity>
-
-                {/* Primeiro nível: Total Consumido (sem detalhes) */}
-                {refeicoesExpandidas[refeicao.id] && refeicao.alimentos.length > 0 && (
-                  <View style={styles.expandedContent}>
-                    {/* Subcard de Total Consumido - Agora clicável para expandir detalhes */}
-                    <TouchableOpacity 
-                      style={styles.totalConsumedCard}
-                      onPress={() => toggleDetalhes(refeicao.id)}
-                    >
-                      <Text style={styles.totalConsumedText}>
-                        Total Consumido: {refeicao.calorias.toFixed(0)} Kcal
-                      </Text>
-                      <Text style={styles.expandIcon}>
-                        {detalhesExpandidos[refeicao.id] ? '▼' : '▶'}
-                      </Text>
-                    </TouchableOpacity>
-
-                    {/* Segundo nível: Tabela Nutricional Expandida (apenas quando clicado no Total Consumido) */}
-                    {detalhesExpandidos[refeicao.id] && (
-                      <View style={styles.foodsTable}>
-                        <View style={styles.tableHeader}>
-                          <Text style={styles.headerCell}>Nome</Text>
-                          <Text style={styles.headerCell}>Quantidade</Text>
-                          <Text style={styles.headerCell}>Kcal</Text>
-                          <Text style={styles.headerCell}>Carb</Text>
-                          <Text style={styles.headerCell}>Proteínas</Text>
-                          <Text style={styles.headerCell}>Fibras</Text>
-                        </View>
-                        
-                        {refeicao.alimentos.map((alimento, index) => (
-                          <View key={index} style={styles.tableRow}>
-                            <Text style={styles.cell}>{alimento.nome}</Text>
-                            <Text style={styles.cell}>{alimento.quantidade}</Text>
-                            <Text style={styles.cell}>{alimento.kcal}</Text>
-                            <Text style={styles.cell}>{alimento.carboidratos}</Text>
-                            <Text style={styles.cell}>{alimento.proteinas}</Text>
-                            <Text style={styles.cell}>{alimento.fibras}</Text>
-                          </View>
-                        ))}
-                        
-                        {/* Linha de Totais */}
-                        {totais && (
-                          <View style={[styles.tableRow, styles.totalRow]}>
-                            <Text style={[styles.cell, styles.totalCell]}>Total</Text>
-                            <Text style={[styles.cell, styles.totalCell]}>{totais.quantidade.toFixed(0)}g</Text>
-                            <Text style={[styles.cell, styles.totalCell]}>{totais.kcal.toFixed(0)}</Text>
-                            <Text style={[styles.cell, styles.totalCell]}>{totais.carboidratos.toFixed(0)}g</Text>
-                            <Text style={[styles.cell, styles.totalCell]}>{totais.proteinas.toFixed(0)}g</Text>
-                            <Text style={[styles.cell, styles.totalCell]}>{totais.fibras.toFixed(0)}g</Text>
-                          </View>
-                        )}
-
-                        {/* Botão para adicionar mais alimentos a esta refeição */}
-                        <TouchableOpacity 
-                          style={styles.addFoodButton}
-                          onPress={() => abrirTelaAdicionar(refeicao.id)}
-                        >
-                          <Text style={styles.addFoodButtonText}>+ Adicionar Alimento</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {/* Se a refeição está expandida mas não tem alimentos, mostrar botão para adicionar */}
-                {refeicoesExpandidas[refeicao.id] && refeicao.alimentos.length === 0 && (
-                  <View style={styles.expandedContent}>
-                    <TouchableOpacity 
-                      style={styles.addFoodButtonEmpty}
-                      onPress={() => abrirTelaAdicionar(refeicao.id)}
-                    >
-                      <Text style={styles.addFoodButtonText}>+ Adicionar Primeiro Alimento</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
               </View>
-            );
-          })}
-        </View>
+            )}
+          </View>
+        )}
+
+        {/* Se a refeição está expandida mas não tem alimentos, mostrar botão para adicionar */}
+        {refeicoesExpandidas[refeicao.id] && refeicao.alimentos.length === 0 && (
+          <View style={styles.expandedContent}>
+            <TouchableOpacity 
+              style={styles.addFoodButtonEmpty}
+              onPress={() => abrirTelaAdicionar(refeicao.id)}
+            >
+              <Text style={styles.addFoodButtonText}>+ Adicionar Primeiro Alimento</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  })}
+</View>
       </ScrollView>
 
       {/* 8. Rodapé da Tela */}
@@ -729,10 +789,20 @@ const styles = StyleSheet.create({
     color: "#222",
     flex: 1,
   },
+  mealInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   mealCalories: {
     fontSize: 14,
     color: "#666",
     fontWeight: "500",
+  },
+  mealCount: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
+    marginLeft: 5,
   },
   // Conteúdo Expandido
   expandedContent: {
@@ -784,6 +854,7 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#DDD",
@@ -793,6 +864,11 @@ const styles = StyleSheet.create({
     color: "#333",
     flex: 1,
     textAlign: "center",
+  },
+  actionCell: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   totalRow: {
     backgroundColor: "#D6D6D6",
@@ -822,80 +898,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 14,
   },
-  // Modal
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 25,
-    width: "90%",
-    maxHeight: "80%",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
-    textAlign: "center",
-  },
-  textInput: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#FF9800",
+  // Estilo para o botão de excluir
+  deleteButton: {
+    backgroundColor: '#FF6B6B', // Vermelho mais suave
+    width: 20,
+    height: 20,
     borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 10,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  cancelButton: {
-    backgroundColor: "#E0E0E0",
-  },
-  cancelButtonText: {
-    color: "#666",
-    fontWeight: "bold",
-  },
-  saveButton: {
-    backgroundColor: "#FF9800",
-  },
-  saveButtonText: {
-    color: "#FFF",
-    fontWeight: "bold",
-  },
-  // 8. Rodapé
-  bottomNav: {
-    flexDirection: "row",
-    backgroundColor: "#FF9E00",
-    height: 60,
-    paddingHorizontal: 10,
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  navButton: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  navIcon: {
-    fontSize: 20,
-    color: "#000",
+  deleteButtonText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });

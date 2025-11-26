@@ -75,15 +75,15 @@ export default function InformacoesUsuarioPasso1({ navigation, route }) {
 
   const handleProximo = () => {
     if (validarCampos()) {
-      navigation.navigate("InformacoesUsuarioPasso2", {
-        dadosCadastro: {
-          ...dadosCadastro,
-          nomeCompleto,
-          telefone,
-          estado,
-          objetivo
-        }
-      });
+        navigation.navigate("InformacoesUsuarioPasso2", {
+          dadosCadastro: {
+            ...dadosCadastro,
+            nomeCompleto,
+            telefone,
+            estado,
+            objetivo
+          }
+        });
     }
   };
 
@@ -104,7 +104,7 @@ export default function InformacoesUsuarioPasso1({ navigation, route }) {
       
       {/* Título e Subtítulo */}
       <Text style={styles.title}>Suas Informações</Text>
-      <Text style={styles.subtitle}>Passo 1/2</Text>
+      <Text style={styles.subtitle}>Passo 1/4</Text>
 
       {/* Campo Nome Completo */}
       <Text style={styles.label}>Nome Completo</Text>

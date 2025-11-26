@@ -2,362 +2,167 @@ import React, { useState } from "react";
 import { 
   View, 
   Text, 
-  TextInput, 
   TouchableOpacity, 
   StyleSheet,
   Modal,
   ScrollView,
-  TouchableWithoutFeedback,
-  Platform
+  TouchableWithoutFeedback
 } from "react-native";
-
-// Para web, não importamos o DateTimePicker
-let DateTimePicker;
-if (Platform.OS !== 'web') {
-  DateTimePicker = require('@react-native-community/datetimepicker').default;
-}
 
 export default function InformacoesUsuarioPasso2({ navigation, route }) {
   const { dadosCadastro } = route.params || {};
-  const [peso, setPeso] = useState("");
-  const [altura, setAltura] = useState("");
-  const [movimentacao, setMovimentacao] = useState("");
-  const [genero, setGenero] = useState("");
-  const [dataNascimento, setDataNascimento] = useState(new Date(1990, 0, 1));
-  const [dataInput, setDataInput] = useState("01/01/1990"); // Para web
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [alimentos, setAlimentos] = useState([]);
+  const [alergias, setAlergias] = useState([]);
   
-  // Estados para os modais
-  const [modalMovimentacaoVisible, setModalMovimentacaoVisible] = useState(false);
-  const [modalGeneroVisible, setModalGeneroVisible] = useState(false);
+  const [modalAlimentosVisible, setModalAlimentosVisible] = useState(false);
+  const [modalAlergiasVisible, setModalAlergiasVisible] = useState(false);
 
-  // Opções para movimentação semanal
-  const opcoesMovimentacao = [
-    "Sedentário (pouco ou nenhum exercício)",
-    "Levemente ativo (exercício leve 1-3 dias/semana)",
-    "Moderadamente ativo (exercício moderado 3-5 dias/semana)",
-    "Muito ativo (exercício intenso 6-7 dias/semana)",
-    "Extremamente ativo (exercício muito intenso, trabalho físico)"
+  const opcoesAlimentos = [
+    "Frutas",
+    "Legumes e Verduras",
+    "Carnes (bovina, suína, frango)",
+    "Peixes e Frutos do Mar",
+    "Laticínios (leite, queijo, iogurte)",
+    "Ovos",
+    "Grãos e Cereais (arroz, trigo, aveia)",
+    "Leguminosas (feijão, lentilha, grão-de-bico)",
+    "Nozes e Sementes",
+    "Alimentos Integrais",
+    "Alimentos Processados",
+    "Fast Food",
+    "Doces e Sobremesas",
+    "Alimentos Vegetarianos/Veganos"
   ];
 
-  // Opções para gênero
-  const opcoesGenero = [
-    "Masculino",
-    "Feminino",
-    "Prefiro não informar"
+  const opcoesAlergias = [
+    "lactose",
+    "gluten", 
+    "frutose",
+    "sacarose",
+    "nozes",
+    "fruto do mar",
+    "não"
   ];
 
-  // Função para formatar a data no formato DD/MM/AAAA
-  const formatarData = (data) => {
-    if (Platform.OS === 'web') {
-      return dataInput; // Retorna o input direto na web
-    }
-    
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const ano = data.getFullYear();
-    return `${dia}/${mes}/${ano}`;
-  };
-
-  // Função para converter string DD/MM/AAAA para Date
-  const converterParaData = (dataStr) => {
-    const partes = dataStr.split('/');
-    if (partes.length === 3) {
-      const dia = parseInt(partes[0], 10);
-      const mes = parseInt(partes[1], 10) - 1;
-      const ano = parseInt(partes[2], 10);
-      return new Date(ano, mes, dia);
-    }
-    return new Date(1990, 0, 1); // Data padrão
-  };
-
-  // Função chamada quando a data é selecionada (mobile)
-  const onChangeDate = (event, selectedDate) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
-    
-    if (selectedDate) {
-      setDataNascimento(selectedDate);
-      if (errors.dataNascimento) setErrors({...errors, dataNascimento: null});
-    }
-  };
-
-  // Função para validar data no formato DD/MM/AAAA
-  const validarData = (dataStr) => {
-    const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
-    if (!regex.test(dataStr)) return false;
-    
-    const partes = dataStr.split('/');
-    const dia = parseInt(partes[0], 10);
-    const mes = parseInt(partes[1], 10) - 1;
-    const ano = parseInt(partes[2], 10);
-    
-    const data = new Date(ano, mes, dia);
-    const hoje = new Date();
-    
-    return (
-      data.getDate() === dia &&
-      data.getMonth() === mes &&
-      data.getFullYear() === ano &&
-      data <= hoje
-    );
-  };
-
-  const validarCampos = () => {
-    const novosErros = {};
-
-    if (!peso.trim()) {
-      novosErros.peso = "Peso é obrigatório";
-    } else if (isNaN(peso) || parseFloat(peso) <= 0) {
-      novosErros.peso = "Peso deve ser um número válido";
-    }
-
-    if (!altura.trim()) {
-      novosErros.altura = "Altura é obrigatória";
-    } else if (isNaN(altura) || parseFloat(altura) <= 0) {
-      novosErros.altura = "Altura deve ser um número válido";
-    }
-
-    if (!movimentacao.trim()) {
-      novosErros.movimentacao = "Movimentação semanal é obrigatória";
-    }
-
-    if (!genero.trim()) {
-      novosErros.genero = "Gênero é obrigatório";
-    }
-
-    // Validação de data diferente para web e mobile
-    if (Platform.OS === 'web') {
-      if (!dataInput.trim()) {
-        novosErros.dataNascimento = "Data de nascimento é obrigatória";
-      } else if (!validarData(dataInput)) {
-        novosErros.dataNascimento = "Data deve estar no formato DD/MM/AAAA e não pode ser futura";
+  const toggleAlimento = (alimento) => {
+    setAlimentos(prev => {
+      if (prev.includes(alimento)) {
+        return prev.filter(item => item !== alimento);
+      } else {
+        return [...prev, alimento];
       }
+    });
+  };
+
+  const toggleAlergia = (alergia) => {
+    if (alergia === "não") {
+      setAlergias(["não"]);
     } else {
-      const hoje = new Date();
-      if (dataNascimento > hoje) {
-        novosErros.dataNascimento = "Data de nascimento não pode ser futura";
-      }
-    }
-
-    setErrors(novosErros);
-    return Object.keys(novosErros).length === 0;
-  };
-
-  const handleProximo = () => {
-    if (validarCampos()) {
-      // Preparar dados para próxima tela
-      const dadosParaPasso3 = {
-        ...dadosCadastro,
-        peso: parseFloat(peso),
-        altura: parseFloat(altura),
-        movimentacao,
-        genero,
-        dataNascimento: Platform.OS === 'web' ? dataInput : formatarData(dataNascimento)
-      };
-      
-      console.log("📤 Passo2 enviando para Passo3:", dadosParaPasso3);
-      
-      // Navega para a tela do IMC passando os dados
-      navigation.navigate("InformacoesUsuarioPasso3", {
-        dadosCadastro: dadosParaPasso3
+      setAlergias(prev => {
+        const filtered = prev.filter(item => item !== "não");
+        if (filtered.includes(alergia)) {
+          return filtered.filter(item => item !== alergia);
+        } else {
+          return [...filtered, alergia];
+        }
       });
     }
   };
 
-  const selecionarMovimentacao = (movimentacaoSelecionada) => {
-    setMovimentacao(movimentacaoSelecionada);
-    setModalMovimentacaoVisible(false);
-    if (errors.movimentacao) setErrors({...errors, movimentacao: null});
+  const handleProximo = () => {
+    const dadosParaPasso3 = {
+      ...dadosCadastro,
+      alimentos: alimentos.length > 0 ? alimentos : [],
+      alergias: alergias.length > 0 ? alergias : ["não"]
+    };
+    
+    navigation.navigate("InformacoesUsuarioPasso3", {
+      dadosCadastro: dadosParaPasso3
+    });
   };
 
-  const selecionarGenero = (generoSelecionado) => {
-    setGenero(generoSelecionado);
-    setModalGeneroVisible(false);
-    if (errors.genero) setErrors({...errors, genero: null});
+  const formatarAlimentosSelecionados = () => {
+    if (alimentos.length === 0) return "Selecione os alimentos que consome";
+    if (alimentos.length <= 3) return alimentos.join(", ");
+    return `${alimentos.slice(0, 3).join(", ")} +${alimentos.length - 3} mais`;
   };
 
-  // Renderização do campo de data condicional
-  const renderCampoData = () => {
-    if (Platform.OS === 'web') {
-      return (
-        <>
-          <TextInput
-            style={[styles.input, errors.dataNascimento && styles.inputError]}
-            placeholder="DD/MM/AAAA"
-            value={dataInput}
-            onChangeText={(text) => {
-              // Formatação automática
-              let formattedText = text.replace(/\D/g, '');
-              if (formattedText.length > 2) {
-                formattedText = formattedText.substring(0, 2) + '/' + formattedText.substring(2);
-              }
-              if (formattedText.length > 5) {
-                formattedText = formattedText.substring(0, 5) + '/' + formattedText.substring(5, 9);
-              }
-              setDataInput(formattedText);
-              if (errors.dataNascimento) setErrors({...errors, dataNascimento: null});
-            }}
-            maxLength={10}
-          />
-          <Text style={styles.helperText}>Formato: DD/MM/AAAA</Text>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <TouchableOpacity 
-            style={[styles.dropdown, errors.dataNascimento && styles.inputError]}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.dropdownText}>
-              {formatarData(dataNascimento)}
-            </Text>
-            <Text style={styles.dropdownArrow}>▼</Text>
-          </TouchableOpacity>
-          
-          {showDatePicker && DateTimePicker && (
-            <DateTimePicker
-              value={dataNascimento}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={onChangeDate}
-              maximumDate={new Date()}
-              minimumDate={new Date(1900, 0, 1)}
-              locale="pt-BR"
-            />
-          )}
-
-          {showDatePicker && Platform.OS === 'ios' && (
-            <View style={styles.iosDatePickerContainer}>
-              <TouchableOpacity 
-                style={styles.closeDatePickerButton}
-                onPress={() => setShowDatePicker(false)}
-              >
-                <Text style={styles.closeDatePickerText}>Confirmar</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </>
-      );
-    }
+  const formatarAlergiasSelecionadas = () => {
+    if (alergias.length === 0) return "Selecione suas alergias";
+    if (alergias.includes("não")) return "Nenhuma alergia";
+    return alergias.join(", ");
   };
 
   return (
     <View style={styles.container}>
-      
-      {/* Título e Subtítulo */}
-      <Text style={styles.title}>Suas Informações</Text>
-      <Text style={styles.subtitle}>Passo 2/2</Text>
+      <Text style={styles.title}>Preferências Alimentares</Text>
+      <Text style={styles.subtitle}>Passo 2/4</Text>
 
-      {/* Campo Peso */}
-      <Text style={styles.label}>Peso (kg)</Text>
-      <TextInput
-        style={[styles.input, errors.peso && styles.inputError]}
-        placeholder="Digite seu peso"
-        value={peso}
-        onChangeText={(text) => {
-          setPeso(text);
-          if (errors.peso) setErrors({...errors, peso: null});
-        }}
-        keyboardType="numeric"
-      />
-      {errors.peso && <Text style={styles.errorText}>{errors.peso}</Text>}
-
-      {/* Campo Altura */}
-      <Text style={styles.label}>Altura (cm)</Text>
-      <TextInput
-        style={[styles.input, errors.altura && styles.inputError]}
-        placeholder="Digite sua altura"
-        value={altura}
-        onChangeText={(text) => {
-          setAltura(text);
-          if (errors.altura) setErrors({...errors, altura: null});
-        }}
-        keyboardType="numeric"
-      />
-      {errors.altura && <Text style={styles.errorText}>{errors.altura}</Text>}
-
-      {/* Campo Movimentação Semanal */}
-      <Text style={styles.label}>Movimentação Semanal</Text>
+      <Text style={styles.label}>Quais tipos de alimentos você consome?</Text>
       <TouchableOpacity 
-        style={[styles.dropdown, errors.movimentacao && styles.inputError]}
-        onPress={() => setModalMovimentacaoVisible(true)}
+        style={styles.dropdown}
+        onPress={() => setModalAlimentosVisible(true)}
       >
-        <Text style={movimentacao ? styles.dropdownText : styles.dropdownPlaceholder}>
-          {movimentacao || "Selecione sua movimentação"}
+        <Text style={alimentos.length > 0 ? styles.dropdownText : styles.dropdownPlaceholder}>
+          {formatarAlimentosSelecionados()}
         </Text>
         <Text style={styles.dropdownArrow}>▼</Text>
       </TouchableOpacity>
-      {errors.movimentacao && <Text style={styles.errorText}>{errors.movimentacao}</Text>}
 
-      {/* Campo Gênero */}
-      <Text style={styles.label}>Gênero</Text>
+      <Text style={styles.label}>Você possui alguma alergia alimentar?</Text>
       <TouchableOpacity 
-        style={[styles.dropdown, errors.genero && styles.inputError]}
-        onPress={() => setModalGeneroVisible(true)}
+        style={styles.dropdown}
+        onPress={() => setModalAlergiasVisible(true)}
       >
-        <Text style={genero ? styles.dropdownText : styles.dropdownPlaceholder}>
-          {genero || "Selecione seu gênero"}
+        <Text style={alergias.length > 0 ? styles.dropdownText : styles.dropdownPlaceholder}>
+          {formatarAlergiasSelecionadas()}
         </Text>
         <Text style={styles.dropdownArrow}>▼</Text>
       </TouchableOpacity>
-      {errors.genero && <Text style={styles.errorText}>{errors.genero}</Text>}
 
-      {/* Campo Data de Nascimento - CONDICIONAL */}
-      <Text style={styles.label}>Data de Nascimento</Text>
-      {renderCampoData()}
-      {errors.dataNascimento && <Text style={styles.errorText}>{errors.dataNascimento}</Text>}
+      <Text style={styles.infoText}>
+        💡 Estas informações nos ajudam a criar um plano alimentar personalizado.
+      </Text>
 
-      {/* Linha divisória */}
       <View style={styles.divider} />
 
-      {/* Botão Próximo */}
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={handleProximo}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleProximo}>
         <Text style={styles.buttonText}>Próximo</Text>
       </TouchableOpacity>
 
-      {/* Botão Voltar */}
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Text style={styles.backButtonText}>Voltar</Text>
       </TouchableOpacity>
 
-      {/* Modal para Movimentação Semanal */}
+      {/* Modal Alimentos */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalMovimentacaoVisible}
-        onRequestClose={() => setModalMovimentacaoVisible(false)}
+        visible={modalAlimentosVisible}
+        onRequestClose={() => setModalAlimentosVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setModalMovimentacaoVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setModalAlimentosVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Selecione sua movimentação</Text>
+                <Text style={styles.modalTitle}>Selecione os alimentos que você consome</Text>
+                <Text style={styles.modalSubtitle}>Pode selecionar várias opções</Text>
                 <ScrollView style={styles.modalList}>
-                  {opcoesMovimentacao.map((item, index) => (
+                  {opcoesAlimentos.map((item, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.modalItem}
-                      onPress={() => selecionarMovimentacao(item)}
+                      style={[styles.modalItem, alimentos.includes(item) && styles.modalItemSelected]}
+                      onPress={() => toggleAlimento(item)}
                     >
-                      <Text style={styles.modalItemText}>{item}</Text>
+                      <Text style={[styles.modalItemText, alimentos.includes(item) && styles.modalItemTextSelected]}>
+                        {item}
+                      </Text>
+                      {alimentos.includes(item) && <Text style={styles.checkmark}>✓</Text>}
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-                <TouchableOpacity 
-                  style={styles.modalCloseButton}
-                  onPress={() => setModalMovimentacaoVisible(false)}
-                >
-                  <Text style={styles.modalCloseText}>Fechar</Text>
+                <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalAlimentosVisible(false)}>
+                  <Text style={styles.modalCloseText}>Confirmar ({alimentos.length} selecionados)</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
@@ -365,41 +170,41 @@ export default function InformacoesUsuarioPasso2({ navigation, route }) {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Modal para Gênero */}
+      {/* Modal Alergias */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalGeneroVisible}
-        onRequestClose={() => setModalGeneroVisible(false)}
+        visible={modalAlergiasVisible}
+        onRequestClose={() => setModalAlergiasVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setModalGeneroVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setModalAlergiasVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Selecione seu gênero</Text>
+                <Text style={styles.modalTitle}>Selecione suas alergias</Text>
+                <Text style={styles.modalSubtitle}>Pode selecionar mais de uma opção</Text>
                 <ScrollView style={styles.modalList}>
-                  {opcoesGenero.map((item, index) => (
+                  {opcoesAlergias.map((item, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.modalItem}
-                      onPress={() => selecionarGenero(item)}
+                      style={[styles.modalItem, alergias.includes(item) && styles.modalItemSelected]}
+                      onPress={() => toggleAlergia(item)}
                     >
-                      <Text style={styles.modalItemText}>{item}</Text>
+                      <Text style={[styles.modalItemText, alergias.includes(item) && styles.modalItemTextSelected]}>
+                        {item}
+                      </Text>
+                      {alergias.includes(item) && <Text style={styles.checkmark}>✓</Text>}
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
-                <TouchableOpacity 
-                  style={styles.modalCloseButton}
-                  onPress={() => setModalGeneroVisible(false)}
-                >
-                  <Text style={styles.modalCloseText}>Fechar</Text>
+                <TouchableOpacity style={styles.modalCloseButton} onPress={() => setModalAlergiasVisible(false)}>
+                  <Text style={styles.modalCloseText}>Confirmar</Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-
     </View>
   );
 }
@@ -430,31 +235,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#333",
   },
-  input: {
-    height: 45,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    fontSize: 15,
-    marginBottom: 5,
-  },
-  inputError: {
-    borderColor: "#FF0000",
-  },
-  errorText: {
-    color: "#FF0000",
-    fontSize: 12,
-    marginBottom: 10,
-    marginLeft: 5,
-  },
-  helperText: {
-    fontSize: 12,
+  infoText: {
+    fontSize: 14,
     color: "#666",
-    marginBottom: 10,
-    marginLeft: 5,
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 20,
+    fontStyle: "italic",
   },
-  // Estilos para o dropdown
   dropdown: {
     height: 45,
     borderWidth: 1,
@@ -462,7 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 12,
     fontSize: 15,
-    marginBottom: 5,
+    marginBottom: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -512,7 +300,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
   },
-  // Estilos para os modais
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -522,7 +309,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: "50%",
+    maxHeight: "70%",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 10,
@@ -531,20 +318,42 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: 10,
     color: "#333",
   },
+  modalSubtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 15,
+    color: "#666",
+  },
   modalList: {
-    maxHeight: 300,
+    maxHeight: 400,
   },
   modalItem: {
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  modalItemSelected: {
+    backgroundColor: "#FFF0DA",
   },
   modalItemText: {
     fontSize: 16,
     color: "#333",
+    flex: 1,
+  },
+  modalItemTextSelected: {
+    color: "#FF9800",
+    fontWeight: "600",
+  },
+  checkmark: {
+    color: "#FF9800",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   modalCloseButton: {
     paddingVertical: 12,
@@ -556,23 +365,6 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 16,
     color: "#FF9800",
-    fontWeight: "600",
-  },
-  // Estilos para o DatePicker no iOS
-  iosDatePickerContainer: {
-    backgroundColor: "#FFF",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  closeDatePickerButton: {
-    backgroundColor: "#FF9800",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  closeDatePickerText: {
-    color: "#FFF",
-    fontSize: 16,
     fontWeight: "600",
   },
 });

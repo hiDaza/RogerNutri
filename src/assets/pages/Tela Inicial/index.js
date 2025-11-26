@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   },
   refeicaoNome: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: 'ShantellSans-SemiBold',
     flex: 1,
   },
   refeicaoHorario: {

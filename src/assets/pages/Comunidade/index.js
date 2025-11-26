@@ -22,21 +22,21 @@ export default function Comunidade({ navigation }) {
       titulo: 'Torta de Frango',
       autor: 'Ronaldo Oikawa',
       likes: '7.976',
-      imagem: require('../../Images/TelaInicial1.png'), // Placeholder
+      imagem: require('../../Images/TortaFrango.png'), // Placeholder
     },
     {
       id: '2',
       titulo: 'Risotto de limão siciliano',
       autor: 'Celso Olivette Junior',
       likes: '5.127',
-      imagem: require('../../Images/TelaInicial2.png'), // Placeholder
+      imagem: require('../../Images/RisotoLimao.png'), // Placeholder
     },
     {
       id: '3',
       titulo: 'Salada Caesar',
       autor: 'Maria Silva',
       likes: '3.420',
-      imagem: require('../../Images/TelaInicial1.png'), // Placeholder
+      imagem: require('../../Images/salada.png'), // Placeholder
     },
   ];
 

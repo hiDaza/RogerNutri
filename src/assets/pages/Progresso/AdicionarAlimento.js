@@ -25,8 +25,11 @@ export default function AdicionarAlimento({ navigation, route }) {
       kcal: 150,
       carboidratos: '20g',
       proteinas: '15g',
+      gorduras: '4g',
       fibras: '2g',
-      imagem: require('../../Images/TelaInicial1.png')
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Uma combinação clássica e equilibrada de carboidratos e proteínas. O arroz fornece energia enquanto o frango oferece proteínas de alto valor biológico.',
+      ingredientes: ['🍚 Arroz Branco', '🍗 Peito de Frango', '🧅 Cebola', '🧄 Alho', '🧂 Sal']
     },
     { 
       id: '2', 
@@ -35,8 +38,11 @@ export default function AdicionarAlimento({ navigation, route }) {
       kcal: 130,
       carboidratos: '25g',
       proteinas: '5g',
+      gorduras: '2g',
       fibras: '3g',
-      imagem: require('../../Images/TelaInicial1.png')
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Café da manhã reconfortante e rico em fibras. A aveia ajuda a reduzir o colesterol e mantém a saciedade por mais tempo.',
+      ingredientes: ['🥣 Aveia em Flocos', '🥛 Leite Desnatado', '🍯 Mel', '🍌 Banana']
     },
     { 
       id: '3', 
@@ -45,8 +51,11 @@ export default function AdicionarAlimento({ navigation, route }) {
       kcal: 15,
       carboidratos: '3g',
       proteinas: '1g',
+      gorduras: '0g',
       fibras: '1g',
-      imagem: require('../../Images/TelaInicial1.png')
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Leve e refrescante, a salada de alface é perfeita para acompanhar refeições principais sem adicionar muitas calorias.',
+      ingredientes: ['🥬 Alface Crespa', '🍅 Tomate Cereja', '🥒 Pepino', '🍋 Limão']
     },
     { 
       id: '4', 
@@ -55,8 +64,11 @@ export default function AdicionarAlimento({ navigation, route }) {
       kcal: 154,
       carboidratos: '1g',
       proteinas: '11g',
+      gorduras: '10g',
       fibras: '0g',
-      imagem: require('../../Images/TelaInicial1.png')
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Rico em proteínas e gorduras saudáveis, o omelete é uma opção versátil para qualquer refeição do dia.',
+      ingredientes: ['🥚 Ovos', '🧀 Queijo Mussarela', '🌿 Orégano', '🧂 Sal']
     },
     { 
       id: '5', 
@@ -65,9 +77,57 @@ export default function AdicionarAlimento({ navigation, route }) {
       kcal: 89,
       carboidratos: '23g',
       proteinas: '1g',
+      gorduras: '0.5g',
       fibras: '2g',
-      imagem: require('../../Images/TelaInicial1.png')
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Bebida cremosa e energética, ideal para pré-treino ou lanche da tarde.',
+      ingredientes: ['🍌 Banana Congelada', '🥛 Iogurte Natural', '🍯 Mel', '🧊 Gelo']
     },
+  ];
+
+  const receitas = [
+    {
+      id: 'r1',
+      nome: 'Panqueca de Banana Fit',
+      kcal: 250,
+      quantidade: '1 porção',
+      tempo: '15 min',
+      carboidratos: '30g',
+      proteinas: '12g',
+      gorduras: '8g',
+      fibras: '4g',
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Panqueca saudável sem farinha de trigo, adoçada naturalmente com banana.',
+      ingredientes: ['🍌 1 Banana', '🥚 2 Ovos', '🥣 2 col. Aveia']
+    },
+    {
+      id: 'r2',
+      nome: 'Salada Caesar Light',
+      kcal: 180,
+      quantidade: '1 prato',
+      tempo: '10 min',
+      carboidratos: '10g',
+      proteinas: '20g',
+      gorduras: '8g',
+      fibras: '3g',
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Versão mais leve da clássica Caesar Salad, com molho de iogurte.',
+      ingredientes: ['🥬 Alface Romana', '🍗 Frango Grelhado', '🧀 Parmesão Ralado', '🍞 Croutons Integrais']
+    },
+    {
+      id: 'r3',
+      nome: 'Crepioca de Frango',
+      kcal: 320,
+      quantidade: '1 unidade',
+      tempo: '20 min',
+      carboidratos: '25g',
+      proteinas: '28g',
+      gorduras: '12g',
+      fibras: '2g',
+      imagem: require('../../Images/TelaInicial1.png'),
+      descricao: 'Massa de tapioca com ovo, recheada com frango desfiado temperado.',
+      ingredientes: ['🥚 1 Ovo', '🥡 2 col. Goma de Tapioca', '🍗 Frango Desfiado', '🧀 Requeijão Light']
+    }
   ];
 
   // Lista de minhas comidas (alimentos favoritos/adicionados pelo usuário)
@@ -268,10 +328,29 @@ export default function AdicionarAlimento({ navigation, route }) {
       case 'Receitas':
         return (
           <View style={styles.abaContent}>
-            <Text style={styles.abaTitle}>Receitas Salvas</Text>
-            <Text style={styles.placeholderText}>
-              Suas receitas salvas aparecerão aqui...
-            </Text>
+            <Text style={styles.abaTitle}>Receitas Sugeridas</Text>
+            <FlatList
+              data={receitas}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={styles.itemAlimento}
+                  onPress={() => verDetalhesAlimento(item)}
+                >
+                  <View style={styles.alimentoInfo}>
+                    <Text style={styles.nomeAlimento}>{item.nome}</Text>
+                    <Text style={styles.infoAlimento}>{item.kcal} kcal • 🕒 {item.tempo}</Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.addButton}
+                    onPress={() => adicionarAlimento(item)}
+                  >
+                    <Text style={styles.addButtonText}>+</Text>
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+              scrollEnabled={false}
+            />
           </View>
         );
       

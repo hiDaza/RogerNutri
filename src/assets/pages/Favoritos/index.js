@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,13 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavigation from "../../components/Botao/BottomNavigation";
 
 export default function Favoritos({ navigation }) {
   const [abaAtiva, setAbaAtiva] = useState("receitas");
+  const [receitasFavoritas, setReceitasFavoritas] = useState([]);
 
   const comidas = [
     { id: 1, emoji: "🍿", nome: "Pipoca" },
@@ -21,22 +24,43 @@ export default function Favoritos({ navigation }) {
     { id: 5, emoji: "🥗", nome: "Salada" },
   ];
 
-  const receitas = [
-    {
-      id: 1,
-      nome: "Salada de Rúcula",
-      descricao: "Rúcula e tomate",
-      calorias: "300 kCAL",
-      imagem: require("../../Images/TelaInicial1.png"),
-    },
-    {
-      id: 2,
-      nome: "Pão de Queijo",
-      descricao: "Pão de queijo de tapioca",
-      calorias: "450 kCAL",
-      imagem: require("../../Images/TelaInicial2.png"),
-    },
-  ];
+  useFocusEffect(
+    useCallback(() => {
+      carregarFavoritos();
+    }, [])
+  );
+
+  const carregarFavoritos = async () => {
+    try {
+      const favoritosSalvos = await AsyncStorage.getItem('favoritos');
+      if (favoritosSalvos) {
+        const lista = JSON.parse(favoritosSalvos);
+        // Filtrar ou adaptar se necessário. Por enquanto assumimos que tudo salvo é "receita/alimento"
+        // Se quiser separar comidas (emojis) de receitas (cards completos), precisaria de um flag no objeto salvo.
+        // Como o pedido foi genérico, vamos exibir tudo na aba de receitas por enquanto ou adaptar.
+        
+        const receitasAdaptadas = lista.map(item => ({
+          ...item,
+          imagem: item.imagem || require("../../Images/TelaInicial1.png"), // Fallback image
+          calorias: item.calorias || `${item.kcal || 0} kcal`
+        }));
+        
+        setReceitasFavoritas(receitasAdaptadas);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar favoritos:", error);
+    }
+  };
+
+  const removerFavorito = async (id) => {
+    try {
+      const novaLista = receitasFavoritas.filter(item => item.id !== id);
+      setReceitasFavoritas(novaLista);
+      await AsyncStorage.setItem('favoritos', JSON.stringify(novaLista));
+    } catch (error) {
+      console.error("Erro ao remover favorito:", error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -94,29 +118,36 @@ export default function Favoritos({ navigation }) {
           </View>
         ) : (
           <View style={styles.receitasContainer}>
-            {receitas.map((receita) => (
-              <TouchableOpacity
-                key={receita.id}
-                style={styles.receitaCard}
-                onPress={() =>
-                  navigation.navigate("DetalhesAlimento", { alimento: receita })
-                }
-              >
-                <Image source={receita.imagem} style={styles.receitaImagem} />
-                <View style={styles.receitaInfo}>
-                  <Text style={styles.calorias}>{receita.calorias}</Text>
-                  <Text style={styles.receitaNome}>{receita.nome}</Text>
-                  <Text style={styles.receitaDescricao}>
-                    {receita.descricao}
-                  </Text>
-                </View>
-                <TouchableOpacity style={styles.favoriteButton}>
-                  <Text style={styles.heartIconFilled}>❤</Text>
+            {receitasFavoritas.length > 0 ? (
+              receitasFavoritas.map((receita) => (
+                <TouchableOpacity
+                  key={receita.id}
+                  style={styles.receitaCard}
+                  onPress={() =>
+                    navigation.navigate("DetalhesAlimento", { alimento: receita })
+                  }
+                >
+                  <Image source={receita.imagem} style={styles.receitaImagem} />
+                  <View style={styles.receitaInfo}>
+                    <Text style={styles.calorias}>{receita.calorias}</Text>
+                    <Text style={styles.receitaNome}>{receita.nome}</Text>
+                    <Text style={styles.receitaDescricao}>
+                      {receita.descricao || "Sem descrição"}
+                    </Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.favoriteButton}
+                    onPress={() => removerFavorito(receita.id)}
+                  >
+                    <Text style={styles.heartIconFilled}>❤</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
+              ))
+            ) : (
+              <Text style={styles.emptyText}>Nenhum favorito adicionado ainda.</Text>
+            )}
 
-            <TouchableOpacity style={styles.buscarButton}>
+            <TouchableOpacity style={styles.buscarButton} onPress={() => navigation.navigate('Progresso')}>
               <Text style={styles.buscarButtonText}>Buscar Receitas</Text>
             </TouchableOpacity>
           </View>

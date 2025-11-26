@@ -1,6 +1,6 @@
 // components/Botao/BottomNavigation.js
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function BottomNavigation({ navigation, activeScreen }) {
@@ -25,10 +25,11 @@ export default function BottomNavigation({ navigation, activeScreen }) {
         style={styles.navButton}
         onPress={() => handleNavigation('Inicial')}
       >
-        <Text style={[
-          styles.navIcon, 
-          activeScreen === 'Inicial' ? styles.navIconActive : {}
-        ]}>🏠</Text>
+        <Image 
+          source={require('../../icons/home.png')}
+          style={styles.navIcon}
+          resizeMode="contain"
+        />
         <Text style={[
           styles.navText,
           activeScreen === 'Inicial' ? styles.navTextActive : {}
@@ -39,24 +40,41 @@ export default function BottomNavigation({ navigation, activeScreen }) {
         style={styles.navButton}
         onPress={() => handleNavigation('Progresso')}
       >
-        <Text style={[
-          styles.navIcon, 
-          activeScreen === 'Progresso' ? styles.navIconActive : {}
-        ]}>📊</Text>
+        <Image 
+          source={require('../../icons/progress.png')}
+          style={styles.navIcon}
+          resizeMode="contain"
+        />
         <Text style={[
           styles.navText,
           activeScreen === 'Progresso' ? styles.navTextActive : {}
         ]}>Progresso</Text>
+      </TouchableOpacity>
+
+       <TouchableOpacity 
+        style={styles.navButton}
+        onPress={() => handleNavigation('Comunidade')}
+      >
+       <Image 
+          source={require('../../icons/comunity.png')}
+          style={styles.navIcon}
+          resizeMode="contain"
+        />
+        <Text style={[
+          styles.navText,
+          activeScreen === 'Favoritos' ? styles.navTextActive : {}
+        ]}>Comunidade</Text>
       </TouchableOpacity>
       
       <TouchableOpacity 
         style={styles.navButton}
         onPress={() => handleNavigation('Favoritos')}
       >
-        <Text style={[
-          styles.navIcon, 
-          activeScreen === 'Favoritos' ? styles.navIconActive : {}
-        ]}>❤</Text>
+       <Image 
+          source={require('../../icons/favorite.png')}
+          style={styles.navIcon}
+          resizeMode="contain"
+        />
         <Text style={[
           styles.navText,
           activeScreen === 'Favoritos' ? styles.navTextActive : {}
@@ -67,10 +85,11 @@ export default function BottomNavigation({ navigation, activeScreen }) {
         style={styles.navButton}
         onPress={() => handleNavigation('Perfil')}
       >
-        <Text style={[
-          styles.navIcon, 
-          activeScreen === 'Perfil' ? styles.navIconActive : {}
-        ]}>👤</Text>
+        <Image 
+          source={require('../../icons/profile.png')}
+          style={styles.navIcon}
+          resizeMode="contain"
+        />
         <Text style={[
           styles.navText,
           activeScreen === 'Perfil' ? styles.navTextActive : {}
@@ -100,6 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#333',
     marginBottom: 2,
+    width: 30
   },
   navIconActive: {
     color: '#FFF',

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,85 +8,206 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import BottomNavigation from "../../components/Botao/BottomNavigation";
 
 export default function Inicial({ navigation }) {
   const [refeicoesExpandidas, setRefeicoesExpandidas] = useState({});
-  const [refeicoes, setRefeicoes] = useState([
+  
+  const refeicoesPadrao = [
     {
       id: 1,
-      nome: "Café da manhã",
+      nome: "Café da Manhã", // Adjusted to match Progresso
       horario: "08:00 - 08:30",
-      completo: true,
-      alimentos: [
-        {
-          id: 1,
-          nome: "Pão de Queijo",
-          descricao: "Pão de queijo de tapioca",
-          calorias: "450 kCAL",
-          imagem: require("../../Images/TelaInicial1.png"),
-          favorito: false,
-        },
-        {
-          id: 2,
-          nome: "Tapioca",
-          descricao: "Tapioca de presunto e queijo",
-          calorias: "450 kCAL",
-          imagem: require("../../Images/TelaInicial2.png"),
-          favorito: true,
-        },
-      ],
+      completo: false,
+      alimentos: [],
     },
     {
       id: 2,
       nome: "Almoço",
       horario: "12:00 - 12:30",
-      completo: true,
-      alimentos: [
+      completo: false,
+      alimentos: [],
+    },
+    {
+      id: 4, // Adjusted ID to match Progresso (Café da Tarde is 4 there)
+      nome: "Café da Tarde",
+      horario: "15:00 - 15:30",
+      completo: false,
+      alimentos: [],
+    },
+    {
+      id: 5, // Jantar is 5
+      nome: "Jantar",
+      horario: "20:00 - 20:30",
+      completo: false,
+      alimentos: [],
+    },
+  ];
+
+  const [refeicoes, setRefeicoes] = useState(refeicoesPadrao);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Descomente a linha abaixo para resetar/popular dados de teste (execute uma vez e comente novamente)
+      popularDadosTeste();
+      carregarRefeicoesDoDia();
+    }, [])
+  );
+
+  const popularDadosTeste = async () => {
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataAtual = `${dia}/${mes}/${ano}`;
+
+    const dadosFicticios = {
+      caloriasConsumidas: 1250,
+      caloriasQueimadas: 300,
+      refeicoes: [
+        {
+          id: 1,
+          nome: "Café da Manhã",
+          calorias: 450,
+          cor: "#FFE8D2",
+          alimentos: [
+            {
+              id: "101",
+              nome: "Pão de Queijo",
+              kcal: 150,
+              proteinas: "5g",
+              carboidratos: "20g",
+              gorduras: "8g",
+              descricao: "Pão de queijo tradicional mineiro",
+              imagem: require("../../Images/TelaInicial1.png")
+            },
+            {
+              id: "102",
+              nome: "Café com Leite",
+              kcal: 80,
+              proteinas: "3g",
+              carboidratos: "10g",
+              gorduras: "2g",
+              descricao: "Café preto com leite integral",
+              imagem: require("../../Images/TelaInicial2.png")
+            }
+          ]
+        },
+        {
+          id: 2,
+          nome: "Almoço",
+          calorias: 600,
+          cor: "#FFE8D2",
+          alimentos: [
+            {
+              id: "201",
+              nome: "Arroz com Frango",
+              kcal: 400,
+              proteinas: "30g",
+              carboidratos: "45g",
+              gorduras: "10g",
+              descricao: "Arroz branco com peito de frango grelhado",
+              imagem: require("../../Images/TelaInicial1.png")
+            },
+            {
+              id: "202",
+              nome: "Salada Verde",
+              kcal: 50,
+              proteinas: "1g",
+              carboidratos: "5g",
+              gorduras: "0g",
+              descricao: "Alface, rúcula e pepino",
+              imagem: require("../../Images/TelaInicial2.png")
+            }
+          ]
+        },
         {
           id: 3,
-          nome: "Salada de Rúcula",
-          descricao: "Rúcula e tomate",
-          calorias: "300 kCAL",
-          imagem: require("../../Images/TelaInicial1.png"),
-          favorito: false,
+          nome: "Exercícios",
+          calorias: 0,
+          cor: "#A2A2A2",
+          alimentos: []
         },
         {
           id: 4,
-          nome: "Frango Grelhado",
-          descricao: "Frango com legumes",
-          calorias: "350 kCAL",
-          imagem: require("../../Images/TelaInicial2.png"),
-          favorito: false,
+          nome: "Café da Tarde",
+          calorias: 200,
+          cor: "#FFE8D2",
+          alimentos: [
+            {
+              id: "401",
+              nome: "Iogurte com Frutas",
+              kcal: 200,
+              proteinas: "8g",
+              carboidratos: "25g",
+              gorduras: "5g",
+              descricao: "Iogurte natural com morango e banana",
+              imagem: require("../../Images/TelaInicial1.png")
+            }
+          ]
         },
-      ],
-    },
-    {
-      id: 3,
-      nome: "Café da tarde",
-      horario: "15:00 - 15:30",
-      completo: false,
-      alimentos: [
         {
           id: 5,
-          nome: "Iogurte Natural",
-          descricao: "Iogurte com granola",
-          calorias: "200 kCAL",
-          imagem: require("../../Images/TelaInicial1.png"),
-          favorito: false,
-        },
-        {
-          id: 6,
-          nome: "Bolo de Cenoura",
-          descricao: "Bolo caseiro",
-          calorias: "400 kCAL",
-          imagem: require("../../Images/TelaInicial2.png"),
-          favorito: false,
-        },
-      ],
-    },
-  ]);
+          nome: "Jantar",
+          calorias: 0,
+          cor: "#FFB74D",
+          alimentos: []
+        }
+      ]
+    };
+
+    try {
+      await AsyncStorage.setItem(`progresso_${dataAtual}`, JSON.stringify(dadosFicticios));
+      console.log("Dados fictícios inseridos com sucesso!");
+      // Recarregar a tela
+      carregarRefeicoesDoDia();
+    } catch (error) {
+      console.error("Erro ao popular dados:", error);
+    }
+  };
+
+  const carregarRefeicoesDoDia = async () => {
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataAtual = `${dia}/${mes}/${ano}`;
+
+    try {
+      const dadosSalvos = await AsyncStorage.getItem(`progresso_${dataAtual}`);
+      if (dadosSalvos) {
+        const { refeicoes: refeicoesSalvas } = JSON.parse(dadosSalvos);
+        
+        const refeicoesAtualizadas = refeicoesPadrao.map(refPadrao => {
+          // Find matching meal by ID or Name
+          const refSalva = refeicoesSalvas.find(r => r.id === refPadrao.id || r.nome === refPadrao.nome);
+          
+          if (refSalva && refSalva.alimentos && refSalva.alimentos.length > 0) {
+            return {
+              ...refPadrao,
+              completo: true, // Mark as complete if it has food
+              alimentos: refSalva.alimentos.map(a => ({
+                ...a,
+                calorias: `${a.kcal || 0} kCAL`,
+                descricao: a.descricao || "Alimento registrado",
+                imagem: a.imagem || require("../../Images/TelaInicial1.png"),
+                favorito: false
+              }))
+            };
+          }
+          return refPadrao;
+        });
+        
+        setRefeicoes(refeicoesAtualizadas);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar refeições na Home:", error);
+    }
+  };
+
 
   const toggleRefeicao = (refeicaoId) => {
     setRefeicoesExpandidas(prevState => ({
@@ -95,31 +216,99 @@ export default function Inicial({ navigation }) {
     }));
   };
 
-  const toggleRefeicaoCompleta = (refeicaoId) => {
+  const toggleRefeicaoCompleta = async (refeicaoId) => {
+    // Encontrar a refeição atual
+    const refeicaoAtual = refeicoes.find(r => r.id === refeicaoId);
+    if (!refeicaoAtual) return;
+
+    const novoEstadoCompleto = !refeicaoAtual.completo;
+
+    // Atualizar estado local visualmente
     setRefeicoes(prevRefeicoes => 
       prevRefeicoes.map(refeicao => 
         refeicao.id === refeicaoId 
-          ? { ...refeicao, completo: !refeicao.completo }
+          ? { ...refeicao, completo: novoEstadoCompleto }
           : refeicao
       )
     );
+
+    // Atualizar no AsyncStorage (Progresso)
+    try {
+      const hoje = new Date();
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const ano = hoje.getFullYear();
+      const dataAtual = `${dia}/${mes}/${ano}`;
+      
+      const dadosSalvos = await AsyncStorage.getItem(`progresso_${dataAtual}`);
+      let dadosDia = dadosSalvos ? JSON.parse(dadosSalvos) : { refeicoes: [], caloriasConsumidas: 0, caloriasQueimadas: 0 };
+
+      // Se estiver marcando como completo, precisamos garantir que os alimentos estejam salvos
+      // Se estiver desmarcando, a lógica atual do app mantém os alimentos mas talvez devesse zerar?
+      // Por enquanto, vamos apenas sincronizar o status visual se houver suporte no objeto de progresso,
+      // mas como o objeto de progresso não tem campo "completo" explícito, vamos assumir que
+      // marcar como completo na home é apenas visual OU poderia adicionar alimentos padrão se estiver vazio.
+      
+      // NOTA: A estrutura atual do Progresso não tem um flag "completo". 
+      // Vamos focar na parte de FAVORITOS que foi pedida explicitamente para persistir.
+      
+      console.log(`Refeição ${refeicaoId} marcada como: ${novoEstadoCompleto}`);
+    } catch (error) {
+      console.error("Erro ao atualizar status da refeição:", error);
+    }
   };
 
-  const toggleFavorito = (refeicaoId, alimentoId) => {
+  const toggleFavorito = async (refeicaoId, alimentoId) => {
+    let alimentoFavoritado = null;
+    let novoStatusFavorito = false;
+
+    // Atualizar estado local
     setRefeicoes(prevRefeicoes => 
-      prevRefeicoes.map(refeicao => 
-        refeicao.id === refeicaoId 
-          ? {
-              ...refeicao,
-              alimentos: refeicao.alimentos.map(alimento =>
-                alimento.id === alimentoId
-                  ? { ...alimento, favorito: !alimento.favorito }
-                  : alimento
-              )
-            }
-          : refeicao
-      )
+      prevRefeicoes.map(refeicao => {
+        if (refeicao.id === refeicaoId) {
+          return {
+            ...refeicao,
+            alimentos: refeicao.alimentos.map(alimento => {
+              if (alimento.id === alimentoId) {
+                alimentoFavoritado = alimento;
+                novoStatusFavorito = !alimento.favorito;
+                return { ...alimento, favorito: novoStatusFavorito };
+              }
+              return alimento;
+            })
+          };
+        }
+        return refeicao;
+      })
     );
+
+    // Persistir nos Favoritos
+    if (alimentoFavoritado) {
+      try {
+        const favoritosSalvos = await AsyncStorage.getItem('favoritos');
+        let listaFavoritos = favoritosSalvos ? JSON.parse(favoritosSalvos) : [];
+
+        if (novoStatusFavorito) {
+          // Adicionar aos favoritos se não existir
+          const jaExiste = listaFavoritos.some(fav => fav.id === alimentoId || fav.nome === alimentoFavoritado.nome);
+          if (!jaExiste) {
+            listaFavoritos.push({
+              ...alimentoFavoritado,
+              favorito: true,
+              origem: 'TelaInicial'
+            });
+          }
+        } else {
+          // Remover dos favoritos
+          listaFavoritos = listaFavoritos.filter(fav => fav.id !== alimentoId && fav.nome !== alimentoFavoritado.nome);
+        }
+
+        await AsyncStorage.setItem('favoritos', JSON.stringify(listaFavoritos));
+        console.log("Favoritos atualizados:", listaFavoritos.length);
+      } catch (error) {
+        console.error("Erro ao salvar favoritos:", error);
+      }
+    }
   };
 
   // Função para obter todos os alimentos favoritos de todas as refeições
@@ -187,12 +376,12 @@ export default function Inicial({ navigation }) {
                   style={styles.favoriteButton}
                   onPress={() => toggleFavorito(refeicao.id, alimento.id)}
                 >
-                  <Text style={[
-                    styles.heartIcon,
-                    alimento.favorito && styles.heartIconFavorito
-                  ]}>
-                    {alimento.favorito ? '♥' : '♡'}
-                  </Text>
+                  <Image 
+                    source={alimento.favorito ? require('../../icons/heart.png') : require('../../icons/hollow-heart.png')}
+                    style={[styles.heartIcon
+                    ]}
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}

@@ -23,22 +23,46 @@ export default function Progresso({ navigation, route }) {
   const [caloriasConsumidas, setCaloriasConsumidas] = useState(0);
   const [caloriasQueimadas, setCaloriasQueimadas] = useState(0);
   const [refeicoes, setRefeicoes] = useState([]);
+  const [macrosDiarios, setMacrosDiarios] = useState({
+    proteinas: 0,
+    carboidratos: 0,
+    gorduras: 0
+  });
 
   const infoNutricional = {
-    proteinas: "0g",
-    carboidratos: "0g",
-    gorduras: "0g",
-    qtde: "0%",
+    proteinas: `${macrosDiarios.proteinas.toFixed(0)}g`,
+    carboidratos: `${macrosDiarios.carboidratos.toFixed(0)}g`,
+    gorduras: `${macrosDiarios.gorduras.toFixed(0)}g`,
+    qtde: caloriasMeta > 0 ? `${Math.min(Math.round((caloriasConsumidas / caloriasMeta) * 100), 100)}%` : "0%",
     item: "Meta"
   };
 
-  const diasSemana = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+  const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
   // Carregar dados do usuário ao abrir a tela
   useEffect(() => {
     carregarDadosUsuario();
-    carregarProgressoDia();
+    // Inicializar com a data de hoje se for a primeira vez
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    setDataAtual(`${dia}/${mes}/${ano}`);
+    setDiaAtual(diasSemana[hoje.getDay()]);
   }, []);
+
+  // Carregar progresso sempre que a data mudar
+  useEffect(() => {
+    carregarProgressoDia();
+  }, [dataAtual]);
+
+  // Salvar progresso e recalcular macros sempre que refeições mudarem
+  useEffect(() => {
+    if (refeicoes.length > 0) {
+      salvarProgressoDia();
+      calcularMacrosDiarios();
+    }
+  }, [refeicoes]);
 
   // Escutar mudanças nos parâmetros de navegação
   useEffect(() => {
@@ -54,6 +78,42 @@ export default function Progresso({ navigation, route }) {
       });
     }
   }, [route.params]);
+
+  const calcularMacrosDiarios = () => {
+    let totalProt = 0;
+    let totalCarb = 0;
+    let totalGord = 0;
+    
+    refeicoes.forEach(refeicao => {
+      if (refeicao.alimentos) {
+        refeicao.alimentos.forEach(alimento => {
+          totalProt += parseFloat(alimento.proteinas) || 0;
+          totalCarb += parseFloat(alimento.carboidratos) || 0;
+          totalGord += parseFloat(alimento.gorduras) || 0;
+        });
+      }
+    });
+
+    setMacrosDiarios({
+      proteinas: totalProt,
+      carboidratos: totalCarb,
+      gorduras: totalGord
+    });
+  };
+
+  const salvarProgressoDia = async () => {
+    try {
+      const dadosDia = {
+        refeicoes,
+        caloriasConsumidas,
+        caloriasQueimadas
+      };
+      await AsyncStorage.setItem(`progresso_${dataAtual}`, JSON.stringify(dadosDia));
+    } catch (error) {
+      console.error("Erro ao salvar progresso:", error);
+    }
+  };
+
 
   const adicionarAlimentoDaTela = (alimento, refeicaoId) => {
     console.log("Adicionando alimento:", alimento);
@@ -120,48 +180,56 @@ export default function Progresso({ navigation, route }) {
 
   const carregarProgressoDia = async () => {
     try {
-      const refeicoesIniciais = [
-        { 
-          id: 1, 
-          nome: "Café da Manhã", 
-          calorias: 0, 
-          cor: "#FFE8D2", 
-          alimentos: []
-        },
-        { 
-          id: 2, 
-          nome: "Almoço", 
-          calorias: 0, 
-          cor: "#FFE8D2",
-          alimentos: []
-        },
-        { 
-          id: 3, 
-          nome: "Exercícios", 
-          calorias: 0, 
-          cor: "#A2A2A2",
-          alimentos: []
-        },
-        { 
-          id: 4, 
-          nome: "Café da Tarde", 
-          calorias: 0, 
-          cor: "#FFE8D2",
-          alimentos: []
-        },
-        { 
-          id: 5, 
-          nome: "Jantar", 
-          calorias: 0, 
-          cor: "#FFB74D",
-          alimentos: []
-        },
-      ];
+      const dadosSalvos = await AsyncStorage.getItem(`progresso_${dataAtual}`);
       
-      setRefeicoes(refeicoesIniciais);
-      setCaloriasConsumidas(0);
-      setCaloriasQueimadas(0);
-      
+      if (dadosSalvos) {
+        const { refeicoes: refeicoesSalvas, caloriasConsumidas: calConsumidas, caloriasQueimadas: calQueimadas } = JSON.parse(dadosSalvos);
+        setRefeicoes(refeicoesSalvas);
+        setCaloriasConsumidas(calConsumidas);
+        setCaloriasQueimadas(calQueimadas);
+      } else {
+        const refeicoesIniciais = [
+          { 
+            id: 1, 
+            nome: "Café da Manhã", 
+            calorias: 0, 
+            cor: "#FFE8D2", 
+            alimentos: []
+          },
+          { 
+            id: 2, 
+            nome: "Almoço", 
+            calorias: 0, 
+            cor: "#FFE8D2",
+            alimentos: []
+          },
+          { 
+            id: 3, 
+            nome: "Exercícios", 
+            calorias: 0, 
+            cor: "#A2A2A2",
+            alimentos: []
+          },
+          { 
+            id: 4, 
+            nome: "Café da Tarde", 
+            calorias: 0, 
+            cor: "#FFE8D2",
+            alimentos: []
+          },
+          { 
+            id: 5, 
+            nome: "Jantar", 
+            calorias: 0, 
+            cor: "#FFB74D",
+            alimentos: []
+          },
+        ];
+        
+        setRefeicoes(refeicoesIniciais);
+        setCaloriasConsumidas(0);
+        setCaloriasQueimadas(0);
+      }
     } catch (error) {
       console.error("Erro ao carregar progresso do dia:", error);
     }
@@ -190,19 +258,21 @@ export default function Progresso({ navigation, route }) {
     }));
   };
 
-  const avancarDia = () => {
-    const indexAtual = diasSemana.indexOf(diaAtual);
-    if (indexAtual < diasSemana.length - 1) {
-      setDiaAtual(diasSemana[indexAtual + 1]);
-    }
+  const mudarDia = (dias) => {
+    const [dia, mes, ano] = dataAtual.split('/').map(Number);
+    const data = new Date(ano, mes - 1, dia);
+    data.setDate(data.getDate() + dias);
+    
+    const novoDia = String(data.getDate()).padStart(2, '0');
+    const novoMes = String(data.getMonth() + 1).padStart(2, '0');
+    const novoAno = data.getFullYear();
+    
+    setDataAtual(`${novoDia}/${novoMes}/${novoAno}`);
+    setDiaAtual(diasSemana[data.getDay()]);
   };
 
-  const voltarDia = () => {
-    const indexAtual = diasSemana.indexOf(diaAtual);
-    if (indexAtual > 0) {
-      setDiaAtual(diasSemana[indexAtual - 1]);
-    }
-  };
+  const avancarDia = () => mudarDia(1);
+  const voltarDia = () => mudarDia(-1);
 
   // Função para calcular totais de uma refeição
   const calcularTotais = (alimentos) => {

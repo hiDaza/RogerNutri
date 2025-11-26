@@ -13,11 +13,8 @@ export default function DetalhesAlimento({ route, navigation }) {
   const { alimento } = route.params || {};
   const [mostrarMais, setMostrarMais] = useState(false);
 
-  const textoCompleto =
-    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.";
-
-  const textoResumido =
-    "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.";
+  const descricao = alimento?.descricao || "Sem descrição disponível para este alimento.";
+  const ingredientes = alimento?.ingredientes || [];
 
   return (
     <Modal
@@ -50,23 +47,26 @@ export default function DetalhesAlimento({ route, navigation }) {
               </TouchableOpacity>
             </View>
 
+            {/* Nome do Alimento */}
+            <Text style={styles.foodTitle}>{alimento?.nome || "Alimento"}</Text>
+
             {/* Informações Nutricionais */}
             <View style={styles.nutritionContainer}>
               <View style={styles.nutritionItem}>
                 <Text style={styles.nutritionLabel}>Proteína</Text>
-                <Text style={styles.nutritionValue}>450G</Text>
+                <Text style={styles.nutritionValue}>{alimento?.proteinas || "0g"}</Text>
               </View>
               <View style={styles.nutritionItem}>
                 <Text style={styles.nutritionLabel}>Calorias</Text>
-                <Text style={styles.nutritionValue}>220g</Text>
+                <Text style={styles.nutritionValue}>{alimento?.kcal || alimento?.calorias || "0"}</Text>
               </View>
               <View style={styles.nutritionItem}>
                 <Text style={styles.nutritionLabel}>Gordura</Text>
-                <Text style={styles.nutritionValue}>100g</Text>
+                <Text style={styles.nutritionValue}>{alimento?.gorduras || "0g"}</Text>
               </View>
               <View style={styles.nutritionItem}>
                 <Text style={styles.nutritionLabel}>Carboidrato</Text>
-                <Text style={styles.nutritionValue}>30g</Text>
+                <Text style={styles.nutritionValue}>{alimento?.carboidratos || "0g"}</Text>
               </View>
             </View>
 
@@ -74,33 +74,38 @@ export default function DetalhesAlimento({ route, navigation }) {
             <View style={styles.detailsSection}>
               <Text style={styles.sectionTitle}>Detalhes</Text>
               <Text style={styles.detailsText}>
-                {mostrarMais ? textoCompleto : textoResumido}
+                {mostrarMais ? descricao : (descricao.length > 100 ? descricao.substring(0, 100) + "..." : descricao)}
               </Text>
-              <TouchableOpacity onPress={() => setMostrarMais(!mostrarMais)}>
-                <Text style={styles.lerMaisLink}>
-                  {mostrarMais ? "ler menos..." : "ler mais..."}
-                </Text>
-              </TouchableOpacity>
+              {descricao.length > 100 && (
+                <TouchableOpacity onPress={() => setMostrarMais(!mostrarMais)}>
+                  <Text style={styles.lerMaisLink}>
+                    {mostrarMais ? "ler menos..." : "ler mais..."}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* Ingredientes */}
             <View style={styles.ingredientesSection}>
               <Text style={styles.sectionTitle}>Ingredientes</Text>
-              <View style={styles.ingredientesGrid}>
-                <View style={styles.ingredienteCard}>
-                  <Text style={styles.ingredienteEmoji}>🥬</Text>
+              {ingredientes.length > 0 ? (
+                <View style={styles.ingredientesGrid}>
+                  {ingredientes.slice(0, 3).map((ingrediente, index) => (
+                    <View key={index} style={styles.ingredienteCard}>
+                      <Text style={styles.ingredienteEmoji}>{ingrediente.emoji || "🥘"}</Text>
+                      <Text style={styles.ingredienteNome}>{ingrediente.nome || ingrediente}</Text>
+                    </View>
+                  ))}
+                  {ingredientes.length > 3 && (
+                    <TouchableOpacity style={styles.verTodosCard}>
+                      <Text style={styles.verTodosText}>Ver</Text>
+                      <Text style={styles.verTodosText}>todos</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
-                <View style={styles.ingredienteCard}>
-                  <Text style={styles.ingredienteEmoji}>🧀</Text>
-                </View>
-                <View style={styles.ingredienteCard}>
-                  <Text style={styles.ingredienteEmoji}>🍅</Text>
-                </View>
-                <TouchableOpacity style={styles.verTodosCard}>
-                  <Text style={styles.verTodosText}>Ver</Text>
-                  <Text style={styles.verTodosText}>todos</Text>
-                </TouchableOpacity>
-              </View>
+              ) : (
+                <Text style={styles.detailsText}>Nenhum ingrediente listado.</Text>
+              )}
             </View>
 
             {/* Botão Adicionar aos Favoritos */}
@@ -163,6 +168,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#333",
   },
+  foodTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 15,
+    color: "#333",
+  },
   nutritionContainer: {
     flexDirection: "row",
     backgroundColor: "#FFF5E6",
@@ -218,7 +230,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   ingredienteEmoji: {
-    fontSize: 35,
+    fontSize: 25,
+  },
+  ingredienteNome: {
+    fontSize: 10,
+    color: "#666",
+    marginTop: 2,
+    textAlign: "center",
   },
   verTodosCard: {
     width: 70,

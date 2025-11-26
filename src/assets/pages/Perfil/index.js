@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 
 import BottomNavigation from "../../components/Botao/BottomNavigation";
 
@@ -32,6 +33,7 @@ export default function Perfil({ navigation, route }) {
     pesoDesejado: "",
     duracao: ""
   });
+  const [profileImage, setProfileImage] = useState(null);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingField, setEditingField] = useState("");
@@ -52,8 +54,30 @@ export default function Perfil({ navigation, route }) {
     loadUserData();
   }, [route.params]);
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Precisamos de permissão para acessar sua galeria para trocar a foto de perfil.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+      const newUserData = { ...userData, profileImage: result.assets[0].uri };
+      setUserData(newUserData);
+      saveToAsyncStorage(newUserData);
+    }
+  };
+
   const handleIncomingData = (data) => {
-    if (data && (data.email || data.nome)) {
+    if (data && (data.email || data.nome || data.nomeCompleto)) {
       console.log("Processando dados recebidos:", data);
       const formattedData = {
         nomeCompleto: data.nomeCompleto || data.nome || "",
@@ -67,9 +91,11 @@ export default function Perfil({ navigation, route }) {
         genero: data.genero || "",
         dataNascimento: data.dataNascimento || "",
         pesoDesejado: data.pesoDesejado ? data.pesoDesejado.toString() : "",
-        duracao: data.duracao ? data.duracao.toString() : ""
+        duracao: data.duracao ? data.duracao.toString() : "",
+        profileImage: data.profileImage || null
       };
       setUserData(formattedData);
+      if (data.profileImage) setProfileImage(data.profileImage);
       saveToAsyncStorage(formattedData);
     }
   };
@@ -196,10 +222,10 @@ export default function Perfil({ navigation, route }) {
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageWrapper}>
             <Image 
-              source={{ uri: "https://via.placeholder.com/150" }}
+              source={profileImage ? { uri: profileImage } : { uri: "https://via.placeholder.com/150" }}
               style={styles.profileImage}
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
               <Text style={styles.cameraIcon}>+</Text>
             </TouchableOpacity>
             

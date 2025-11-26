@@ -8,13 +8,14 @@ import {
   TextInput,
   FlatList,
   ScrollView,
+  Alert,
 } from 'react-native';
 
 export default function AdicionarAlimento({ navigation, route }) {
   const [pesquisa, setPesquisa] = useState('');
   const [abaAtiva, setAbaAtiva] = useState('Pesquisar');
   
-  const { refeicaoNome, refeicaoId } = route.params;
+  const { refeicaoNome, refeicaoId } = route.params || {};
 
   // Lista de alimentos para pesquisa (banco de dados geral)
   const alimentosPesquisa = [
@@ -191,7 +192,7 @@ export default function AdicionarAlimento({ navigation, route }) {
 
   const adicionarManual = () => {
     if (!dadosManuais.nome || !dadosManuais.kcal) {
-      alert('Por favor, preencha pelo menos o nome e as calorias do alimento.');
+      Alert.alert('Erro', 'Por favor, preencha pelo menos o nome e as calorias do alimento.');
       return;
     }
 

@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavigation from "../../components/Botao/BottomNavigation";
+import Svg, { Circle } from 'react-native-svg';
 
 export default function Progresso({ navigation, route }) {
   const [refeicoesExpandidas, setRefeicoesExpandidas] = useState({});
@@ -66,7 +67,7 @@ export default function Progresso({ navigation, route }) {
 
   // Escutar mudanças nos parâmetros de navegação
   useEffect(() => {
-    if (route.params?.alimentoAdicionado && route.params?.refeicaoId) {
+    if (route.params?.alimentoAdicionado && route.params?.refeicaoId && refeicoes.length > 0) {
       console.log("Alimento recebido:", route.params.alimentoAdicionado);
       console.log("Refeição ID:", route.params.refeicaoId);
       adicionarAlimentoDaTela(route.params.alimentoAdicionado, route.params.refeicaoId);
@@ -77,7 +78,7 @@ export default function Progresso({ navigation, route }) {
         refeicaoId: undefined 
       });
     }
-  }, [route.params]);
+  }, [route.params, refeicoes]);
 
   const calcularMacrosDiarios = () => {
     let totalProt = 0;
@@ -117,10 +118,11 @@ export default function Progresso({ navigation, route }) {
 
   const adicionarAlimentoDaTela = (alimento, refeicaoId) => {
     console.log("Adicionando alimento:", alimento);
-    
+    console.log(refeicoes);
     setRefeicoes(prevRefeicoes => {
       const refeicoesAtualizadas = prevRefeicoes.map(refeicao => {
-        if (refeicao.id === refeicaoId) {
+        // Usando == para permitir comparação entre string e number
+        if (refeicao.id == refeicaoId) {
           const novosAlimentos = [...refeicao.alimentos, alimento];
           const novasCalorias = novosAlimentos.reduce((total, alimento) => total + alimento.kcal, 0);
           
@@ -133,6 +135,7 @@ export default function Progresso({ navigation, route }) {
         return refeicao;
       });
       
+    console.log(refeicoesAtualizadas)
       return refeicoesAtualizadas;
     });
     
@@ -227,6 +230,7 @@ export default function Progresso({ navigation, route }) {
         ];
         
         setRefeicoes(refeicoesIniciais);
+        console.log("Dados carregados")
         setCaloriasConsumidas(0);
         setCaloriasQueimadas(0);
       }
@@ -304,6 +308,14 @@ export default function Progresso({ navigation, route }) {
 
   const caloriasRestantes = caloriasMeta - caloriasConsumidas;
 
+  // Configuração do gráfico circular
+  const size = 140;
+  const strokeWidth = 10;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const progress = caloriasMeta > 0 ? Math.min(caloriasConsumidas / caloriasMeta, 1) : 0;
+  const strokeDashoffset = circumference - progress * circumference;
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar backgroundColor="#FF9800" barStyle="light-content" />
@@ -333,9 +345,36 @@ export default function Progresso({ navigation, route }) {
         <View style={styles.calorieSection}>
           {/* Círculo Central de Calorias Diárias */}
           <View style={styles.calorieCircleContainer}>
-            <View style={styles.calorieCircle}>
-              <Text style={styles.calorieValue}>{caloriasRestantes.toFixed(0)}</Text>
-              <Text style={styles.calorieLabel}>Kcal restantes</Text>
+            <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+              <Svg width={size} height={size} style={{ position: 'absolute' }}>
+                {/* Círculo de Fundo */}
+                <Circle
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  stroke="#E0E0E0"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                />
+                {/* Círculo de Progresso */}
+                <Circle
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  stroke="#FF9800"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  rotation="-90"
+                  origin={`${size / 2}, ${size / 2}`}
+                />
+              </Svg>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={styles.calorieValue}>{caloriasRestantes.toFixed(0)}</Text>
+                <Text style={styles.calorieLabel}>Kcal restantes</Text>
+              </View>
             </View>
           </View>
 

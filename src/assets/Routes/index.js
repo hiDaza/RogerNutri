@@ -16,6 +16,8 @@ import InformacoesUsuarioPasso1 from "../pages/InformacoesUsuario/Passo1";
 import InformacoesUsuarioPasso2 from "../pages/InformacoesUsuario/Passo2";
 import InformacoesUsuarioPasso3 from "../pages/InformacoesUsuario/Passo3"; 
 import InformacoesUsuarioPasso4 from "../pages/InformacoesUsuario/Passo4";
+import InformacoesUsuarioPasso5 from "../pages/InformacoesUsuario/Passo5";
+
 import CadastroFinalizado from "../pages/CadastroFinalizado";
 import Progresso from "../pages/Progresso";
 import Perfil from "../pages/Perfil";
@@ -29,7 +31,7 @@ export default function Routes() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Favoritos" component={Favoritos} />
+       
         <Stack.Screen name="Onboarding1" component={Onboarding1} />
         <Stack.Screen name="Onboarding2" component={Onboarding2} />
         <Stack.Screen name="Onboarding3" component={Onboarding3} />
@@ -37,13 +39,15 @@ export default function Routes() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
         <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} />
-        <Stack.Screen name="InformacoesUsuarioPasso1" component={InformacoesUsuarioPasso1} />
-        <Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
-        <Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
-        <Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
+<Stack.Screen name="InformacoesUsuarioPasso1" component={InformacoesUsuarioPasso1} />
+<Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
+<Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
+<Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
+<Stack.Screen name="InformacoesUsuarioPasso5" component={InformacoesUsuarioPasso5} />
         <Stack.Screen name="CadastroFinalizado" component={CadastroFinalizado} />
         <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="Progresso" component={Progresso} />
+         <Stack.Screen name="Favoritos" component={Favoritos} />
         <Stack.Screen name="Comunidade" component={Comunidade} />
         <Stack.Screen name="Perfil" component={Perfil} />
         <Stack.Screen name="AdicionarAlimento" component={AdicionarAlimento} />

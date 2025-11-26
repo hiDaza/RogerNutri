@@ -108,7 +108,11 @@ export default function Favoritos({ navigation }) {
         {abaAtiva === "comidas" ? (
           <View style={styles.comidasGrid}>
             {comidas.map((comida) => (
-              <TouchableOpacity key={comida.id} style={styles.comidaCard}>
+              <TouchableOpacity 
+                key={comida.id} 
+                style={styles.comidaCard}
+                onPress={() => navigation.navigate("DetalhesAlimento", { alimento: comida })}
+              >
                 <Text style={styles.comidaEmoji}>{comida.emoji}</Text>
               </TouchableOpacity>
             ))}
@@ -139,7 +143,12 @@ export default function Favoritos({ navigation }) {
                     style={styles.favoriteButton}
                     onPress={() => removerFavorito(receita.id)}
                   >
-                    <Text style={styles.heartIconFilled}>❤</Text>
+                    <Image 
+                      source={require('../../icons/heart.png')}
+                      style={[styles.heartIconFilled
+                      ]}
+                      resizeMode="contain"
+                    />
                   </TouchableOpacity>
                 </TouchableOpacity>
               ))
@@ -147,7 +156,7 @@ export default function Favoritos({ navigation }) {
               <Text style={styles.emptyText}>Nenhum favorito adicionado ainda.</Text>
             )}
 
-            <TouchableOpacity style={styles.buscarButton} onPress={() => navigation.navigate('Progresso')}>
+            <TouchableOpacity style={styles.buscarButton} onPress={() => navigation.navigate('AdicionarAlimento')}>
               <Text style={styles.buscarButtonText}>Buscar Receitas</Text>
             </TouchableOpacity>
           </View>

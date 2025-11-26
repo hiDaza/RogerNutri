@@ -21,7 +21,7 @@ export default function Progresso({ navigation, route }) {
   const [dataAtual, setDataAtual] = useState("15/09/2025");
   
   // Estados para os dados do usuário e progresso
-  const [caloriasMeta, setCaloriasMeta] = useState(0);
+  const [caloriasMeta, setCaloriasMeta] = useState(2500);
   const [caloriasConsumidas, setCaloriasConsumidas] = useState(0);
   const [caloriasQueimadas, setCaloriasQueimadas] = useState(0);
   const [refeicoes, setRefeicoes] = useState([]);

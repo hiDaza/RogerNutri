@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Alert
 } from "react-native";
+import { auth } from "../../services/auth";
+import { UserService } from "../../services/UserService";
 
 export default function CadastroFinalizado({ navigation, route }) {
   // Recebe os dados completos com fallback seguro
@@ -36,7 +38,10 @@ export default function CadastroFinalizado({ navigation, route }) {
       const caloriasTotais = caloriasBase + ajusteCalorico;
       
       // Limitar a um range razoável
-      return Math.max(1200, Math.min(4000, Math.round(caloriasTotais)));
+      const cals = Math.max(1200, Math.min(4000, Math.round(caloriasTotais)))
+      UserService.updateUserData({caloriasMeta: cals});
+      return cals;
+
     } catch (error) {
       console.error("Erro no cálculo:", error);
       return 2000; // Valor padrão

@@ -39,11 +39,11 @@ export default function Routes() {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Cadastro" component={Cadastro} />
         <Stack.Screen name="EsqueceuSenha" component={EsqueceuSenha} />
-<Stack.Screen name="InformacoesUsuarioPasso1" component={InformacoesUsuarioPasso1} />
-<Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
-<Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
-<Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
-<Stack.Screen name="InformacoesUsuarioPasso5" component={InformacoesUsuarioPasso5} />
+        <Stack.Screen name="InformacoesUsuarioPasso1" component={InformacoesUsuarioPasso1} />
+        <Stack.Screen name="InformacoesUsuarioPasso2" component={InformacoesUsuarioPasso2} />
+        <Stack.Screen name="InformacoesUsuarioPasso3" component={InformacoesUsuarioPasso3} />
+        <Stack.Screen name="InformacoesUsuarioPasso4" component={InformacoesUsuarioPasso4} />
+        <Stack.Screen name="InformacoesUsuarioPasso5" component={InformacoesUsuarioPasso5} />
         <Stack.Screen name="CadastroFinalizado" component={CadastroFinalizado} />
         <Stack.Screen name="Inicial" component={Inicial} />
         <Stack.Screen name="Progresso" component={Progresso} />
